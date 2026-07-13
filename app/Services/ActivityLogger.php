@@ -73,6 +73,29 @@ class ActivityLogger
         return ['changes' => $changes];
     }
 
+    /**
+     * @param  iterable<\Illuminate\Database\Eloquent\Model>  $users
+     * @return array<int, array<string, mixed>>
+     */
+    public function pivotAssignments(iterable $users, array $pivotKeys = ['permission', 'is_enabled']): array
+    {
+        $map = [];
+
+        foreach ($users as $user) {
+            $entry = ['user_id' => $user->id, 'name' => method_exists($user, 'displayName') ? $user->displayName() : $user->name];
+
+            foreach ($pivotKeys as $key) {
+                $entry[$key] = $this->normalizeValue($user->pivot->{$key} ?? null);
+            }
+
+            $map[(int) $user->id] = $entry;
+        }
+
+        ksort($map);
+
+        return $map;
+    }
+
     private function sanitize(array $properties): array
     {
         $hidden = ['password', 'password_confirmation', 'current_password', 'remember_token', 'token'];

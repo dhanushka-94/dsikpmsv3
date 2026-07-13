@@ -82,8 +82,8 @@ class ProjectController extends Controller
             description: 'Created project "'.$project->name.'"',
             module: 'projects',
             properties: [
-                'attributes' => $project->toArray(),
-                'assignees' => $assignees,
+                'attributes' => $this->activityLogger->snapshot($project),
+                'assignees' => $this->activityLogger->pivotAssignments($project->users()->get()),
             ],
         );
 
@@ -104,6 +104,17 @@ class ProjectController extends Controller
             'users.department',
             'tasks' => fn ($query) => $query->with(['assignees.designation'])->orderBy('sort_order')->orderBy('starts_at'),
         ]);
+
+        $this->activityLogger->forModel(
+            action: 'viewed',
+            subject: $project,
+            description: 'Viewed project "'.$project->name.'"',
+            module: 'projects',
+            properties: [
+                'tasks_count' => $project->tasks->count(),
+                'users_count' => $project->users->count(),
+            ],
+        );
 
         return view('projects.show', [
             'project' => $project,
@@ -128,6 +139,7 @@ class ProjectController extends Controller
         $validated = $this->validateProject($request, $project);
         $assignees = $this->validatedAssignees($request, $project);
         $before = $this->activityLogger->snapshot($project);
+        $beforeAssignees = $this->activityLogger->pivotAssignments($project->users()->get());
 
         $project->update($validated);
         $project->users()->sync($assignees);
@@ -139,7 +151,8 @@ class ProjectController extends Controller
             module: 'projects',
             properties: [
                 ...$this->activityLogger->diff($before, $this->activityLogger->snapshot($project)),
-                'assignees' => $assignees,
+                'assignees_before' => $beforeAssignees,
+                'assignees_after' => $this->activityLogger->pivotAssignments($project->users()->get()),
             ],
         );
 
@@ -159,6 +172,18 @@ class ProjectController extends Controller
         ]);
 
         if ((int) $validated['confirm_a'] + (int) $validated['confirm_b'] !== (int) $validated['confirm_answer']) {
+            $this->activityLogger->forModel(
+                action: 'delete_verification_failed',
+                subject: $project,
+                description: 'Failed math verification while deleting project "'.$project->name.'"',
+                module: 'projects',
+                properties: [
+                    'confirm_a' => $validated['confirm_a'],
+                    'confirm_b' => $validated['confirm_b'],
+                    'confirm_answer' => $validated['confirm_answer'],
+                ],
+            );
+
             return back()->with('error', 'Incorrect verification answer. Project was not deleted.');
         }
 
@@ -293,7 +318,12 @@ class ProjectController extends Controller
             subject: $project,
             description: ($enabled ? 'Enabled' : 'Disabled').' '.$user->displayName().' on project "'.$project->name.'"',
             module: 'projects',
-            properties: ['user_id' => $user->id, 'is_enabled' => $enabled],
+            properties: [
+                'user_id' => $user->id,
+                'user_name' => $user->displayName(),
+                'permission' => $assignment->pivot->permission,
+                'is_enabled' => $enabled,
+            ],
         );
 
         return back()->with('success', $user->displayName().' has been '.($enabled ? 'enabled' : 'disabled').'.');

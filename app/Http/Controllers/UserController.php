@@ -165,6 +165,17 @@ class UserController extends Controller
         $user->projects_count = $projectStats['total'];
         $user->tasks_count = $taskStats['total'];
 
+        $this->activityLogger->forModel(
+            action: 'profile_viewed',
+            subject: $user,
+            description: 'Viewed profile and progress for '.$user->displayName(),
+            module: 'users',
+            properties: [
+                'project_stats' => $projectStats,
+                'task_stats' => $taskStats,
+            ],
+        );
+
         return view('users.show', [
             'user' => $user,
             'projects' => $projects,

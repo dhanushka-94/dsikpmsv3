@@ -6,6 +6,7 @@ use App\Enums\ProjectPermission;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -13,6 +14,8 @@ use Illuminate\View\View;
 
 class UserTreeController extends Controller
 {
+    public function __construct(private ActivityLogger $activityLogger) {}
+
     public function __invoke(Request $request): View
     {
         $departmentId = $request->integer('department_id') ?: null;
@@ -35,6 +38,19 @@ class UserTreeController extends Controller
 
         $visibleIds = $users->pluck('id')->map(fn ($id) => (int) $id)->all();
         $roots = $this->buildTree($users, $visibleIds);
+
+        $this->activityLogger->log(
+            action: 'viewed',
+            description: 'Viewed users tree',
+            module: 'users_tree',
+            properties: [
+                'total_users' => $users->count(),
+                'filters' => [
+                    'department_id' => $departmentId,
+                    'designation_id' => $designationId,
+                ],
+            ],
+        );
 
         return view('users.tree', [
             'roots' => $roots,
@@ -76,6 +92,17 @@ class UserTreeController extends Controller
                 'url' => route('projects.show', $project),
             ]);
 
+        $this->activityLogger->forModel(
+            action: 'assignments_viewed',
+            subject: $user,
+            description: 'Viewed project assignments for '.$user->displayName(),
+            module: 'users_tree',
+            properties: [
+                'type' => 'projects',
+                'count' => $items->count(),
+            ],
+        );
+
         return response()->json([
             'type' => 'projects',
             'user' => $user->displayName(),
@@ -104,6 +131,17 @@ class UserTreeController extends Controller
                     ? route('projects.tasks.board', $task->project)
                     : null,
             ]);
+
+        $this->activityLogger->forModel(
+            action: 'assignments_viewed',
+            subject: $user,
+            description: 'Viewed task assignments for '.$user->displayName(),
+            module: 'users_tree',
+            properties: [
+                'type' => 'tasks',
+                'count' => $items->count(),
+            ],
+        );
 
         return response()->json([
             'type' => 'tasks',

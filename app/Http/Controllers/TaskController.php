@@ -33,6 +33,14 @@ class TaskController extends Controller
             ];
         });
 
+        $this->activityLogger->forModel(
+            action: 'board_viewed',
+            subject: $project,
+            description: 'Viewed task board for project "'.$project->name.'"',
+            module: 'tasks',
+            properties: ['tasks_count' => $project->tasks->count()],
+        );
+
         return view('tasks.board', [
             'project' => $project,
             'columns' => $columns,
@@ -58,6 +66,14 @@ class TaskController extends Controller
                 'progress' => $task->status === TaskStatus::Done ? 100 : ($task->status === TaskStatus::Review ? 75 : ($task->status === TaskStatus::InProgress ? 40 : 0)),
                 'custom_class' => 'priority-'.$task->priority->value,
             ]);
+
+        $this->activityLogger->forModel(
+            action: 'gantt_viewed',
+            subject: $project,
+            description: 'Viewed Gantt chart for project "'.$project->name.'"',
+            module: 'tasks',
+            properties: ['tasks_count' => $project->tasks->count()],
+        );
 
         return view('tasks.gantt', [
             'project' => $project,
@@ -103,8 +119,10 @@ class TaskController extends Controller
             description: 'Created task "'.$task->title.'" on project "'.$project->name.'"',
             module: 'tasks',
             properties: [
+                'attributes' => $this->activityLogger->snapshot($task),
                 'project_id' => $project->id,
-                'assignees' => $assigneeIds,
+                'project_name' => $project->name,
+                'assignees' => $this->activityLogger->pivotAssignments($task->assignees()->get(), ['is_enabled']),
             ],
         );
 
@@ -135,6 +153,7 @@ class TaskController extends Controller
 
         $assigneeIds = $this->validatedAssigneeIds($request, $project);
         $before = $this->activityLogger->snapshot($task);
+        $beforeAssignees = $this->activityLogger->pivotAssignments($task->assignees()->get(), ['is_enabled']);
 
         $task->update(collect($validated)->except('assignee_ids')->all());
 
@@ -154,7 +173,9 @@ class TaskController extends Controller
             module: 'tasks',
             properties: [
                 ...$this->activityLogger->diff($before, $this->activityLogger->snapshot($task)),
-                'assignees' => $assigneeIds,
+                'project_id' => $project->id,
+                'assignees_before' => $beforeAssignees,
+                'assignees_after' => $this->activityLogger->pivotAssignments($task->assignees()->get(), ['is_enabled']),
             ],
         );
 
@@ -208,8 +229,11 @@ class TaskController extends Controller
             description: 'Moved task "'.$task->title.'" from '.$before.' to '.$validated['status'],
             module: 'tasks',
             properties: [
+                'project_id' => $task->project_id,
+                'project_name' => $task->project?->name,
                 'from' => $before,
                 'to' => $validated['status'],
+                'sort_order' => $task->sort_order,
             ],
         );
 
@@ -327,7 +351,12 @@ class TaskController extends Controller
             subject: $task,
             description: ($enabled ? 'Enabled' : 'Disabled').' '.$user->displayName().' on task "'.$task->title.'"',
             module: 'tasks',
-            properties: ['user_id' => $user->id, 'is_enabled' => $enabled],
+            properties: [
+                'user_id' => $user->id,
+                'user_name' => $user->displayName(),
+                'project_id' => $task->project_id,
+                'is_enabled' => $enabled,
+            ],
         );
 
         return back()->with('success', $user->displayName().' has been '.($enabled ? 'enabled' : 'disabled').' on this task.');
