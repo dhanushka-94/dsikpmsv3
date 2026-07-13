@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChangelogController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\ForcePasswordChangeController;
 use App\Http\Controllers\Auth\LoginController;
@@ -9,6 +10,8 @@ use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\PlantController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\KpiCategoryController;
+use App\Http\Controllers\KpiController;
 use App\Http\Controllers\ProjectCategoryController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
@@ -34,15 +37,19 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
     Route::middleware(EnsurePasswordIsChanged::class)->group(function () {
         Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
+        Route::get('/quick-access', [TaskController::class, 'quickAccess'])->name('quick-access');
+        Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
+        Route::get('/tasks/board', [TaskController::class, 'globalBoard'])->name('tasks.board');
+
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-        Route::get('/users-tree', UserTreeController::class)->name('users.tree');
-        Route::get('/users-tree/{user}/projects', [UserTreeController::class, 'projects'])->name('users.tree.projects');
-        Route::get('/users-tree/{user}/tasks', [UserTreeController::class, 'tasks'])->name('users.tree.tasks');
-        Route::get('/people/{user}', [UserController::class, 'profile'])->name('users.profile');
-
         Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+
+        // Assigned users can view / feed their KPIs; create/edit/delete stay admin-only below.
+        Route::get('kpis', [KpiController::class, 'index'])->name('kpis.index');
+        Route::get('kpis/{kpi}', [KpiController::class, 'show'])->name('kpis.show');
+        Route::post('kpis/{kpi}/calculate', [KpiController::class, 'calculate'])->name('kpis.calculate');
 
         Route::middleware('role:super_admin,admin')->group(function () {
             Route::resource('departments', DepartmentController::class)->except(['show']);
@@ -53,7 +60,15 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
             Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])
                 ->name('users.reset-password');
 
+            Route::get('/users-tree', UserTreeController::class)->name('users.tree');
+            Route::get('/users-tree/{user}/projects', [UserTreeController::class, 'projects'])->name('users.tree.projects');
+            Route::get('/users-tree/{user}/tasks', [UserTreeController::class, 'tasks'])->name('users.tree.tasks');
+            Route::get('/people/{user}', [UserController::class, 'profile'])->name('users.profile');
+
             Route::resource('project-categories', ProjectCategoryController::class)->except(['show']);
+            Route::resource('kpi-categories', KpiCategoryController::class)->except(['show']);
+            Route::resource('kpis', KpiController::class)->except(['index', 'show']);
+            Route::delete('kpis/{kpi}/results/{result}', [KpiController::class, 'destroyResult'])->name('kpis.results.destroy');
 
             Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
             Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
@@ -62,6 +77,10 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
             Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
             Route::get('activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
             Route::get('users/{user}/activity', [ActivityLogController::class, 'forUser'])->name('activity-logs.user');
+        });
+
+        Route::middleware('role:super_admin')->group(function () {
+            Route::get('changelog', ChangelogController::class)->name('changelog.index');
         });
 
         Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');

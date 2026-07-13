@@ -48,7 +48,7 @@ class ActivityLogger
 
     public function snapshot(Model $model, array $except = ['password', 'remember_token']): array
     {
-        return collect($model->getAttributes())
+        return collect($model->attributesToArray())
             ->except($except)
             ->map(fn ($value) => $this->normalizeValue($value))
             ->all();
@@ -126,7 +126,13 @@ class ActivityLogger
         }
 
         if ($value instanceof \DateTimeInterface) {
-            return $value->format('Y-m-d H:i:s');
+            return $value->format('Y-m-d h:i:s A');
+        }
+
+        if (is_array($value)) {
+            return collect($value)
+                ->map(fn ($item) => $this->normalizeValue($item))
+                ->all();
         }
 
         if (is_bool($value)) {

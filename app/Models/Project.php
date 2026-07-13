@@ -81,6 +81,11 @@ class Project extends Model
         return $this->hasMany(Task::class);
     }
 
+    public function kpis(): BelongsToMany
+    {
+        return $this->belongsToMany(Kpi::class)->withTimestamps();
+    }
+
     public function permissionFor(?User $user): ?ProjectPermission
     {
         if (! $user) {

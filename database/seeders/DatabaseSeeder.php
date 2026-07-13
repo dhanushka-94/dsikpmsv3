@@ -9,6 +9,7 @@ use App\Models\Department;
 use App\Models\Designation;
 use App\Models\Plant;
 use App\Models\ProjectCategory;
+use App\Models\KpiCategory;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -83,6 +84,20 @@ class DatabaseSeeder extends Seeder
             ['code' => $data['code']],
             $data + [
                 'description' => $data['name'].' projects',
+                'is_active' => true,
+            ]
+        ));
+
+        collect([
+            ['name' => 'Financial', 'code' => 'FIN', 'sort_order' => 1],
+            ['name' => 'Operational', 'code' => 'OPS', 'sort_order' => 2],
+            ['name' => 'Quality', 'code' => 'QLT', 'sort_order' => 3],
+            ['name' => 'People & Culture', 'code' => 'PPL', 'sort_order' => 4],
+            ['name' => 'Customer', 'code' => 'CUS', 'sort_order' => 5],
+        ])->each(fn (array $data) => KpiCategory::updateOrCreate(
+            ['code' => $data['code']],
+            $data + [
+                'description' => $data['name'].' KPIs',
                 'is_active' => true,
             ]
         ));

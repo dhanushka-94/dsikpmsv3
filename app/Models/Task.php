@@ -58,6 +58,29 @@ class Task extends Model
         return $this->assignees()->wherePivot('is_enabled', true);
     }
 
+    public function isAssignedTo(User $user): bool
+    {
+        if ($this->relationLoaded('assignees')) {
+            $assignee = $this->assignees->firstWhere('id', $user->id);
+
+            return $assignee && (bool) ($assignee->pivot->is_enabled ?? true);
+        }
+
+        return $this->assignees()
+            ->where('users.id', $user->id)
+            ->wherePivot('is_enabled', true)
+            ->exists();
+    }
+
+    public function canBeViewedBy(User $user): bool
+    {
+        if ($user->canManageUsers()) {
+            return true;
+        }
+
+        return $this->isAssignedTo($user);
+    }
+
     public function assigneeNames(): string
     {
         return $this->assignees

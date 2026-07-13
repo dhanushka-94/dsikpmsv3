@@ -125,7 +125,7 @@ class UserTreeController extends Controller
                 'meta' => $task->project?->name,
                 'badge' => $task->status->label(),
                 'badge_class' => $task->status->badgeClasses(),
-                'dates' => $task->starts_at->format('Y-m-d H:i').' → '.$task->ends_at->format('Y-m-d H:i'),
+                'dates' => dsi_datetime($task->starts_at).' → '.dsi_datetime($task->ends_at),
                 'extra' => $task->priority->label(),
                 'url' => $task->project
                     ? route('projects.tasks.board', $task->project)

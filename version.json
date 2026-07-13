@@ -1,0 +1,18 @@
+{
+    "version": "2.0.0",
+    "released_at": "2026-07-14",
+    "releases": [
+        {
+            "version": "2.0.0",
+            "date": "2026-07-14",
+            "title": "Initial 2.0 release",
+            "changes": [
+                "DSI KPI Monitoring System baseline release.",
+                "KPI formulas, feed history, date-range filters, and progress charts.",
+                "Projects, task list, task board, and quick access.",
+                "Role-based access for Super Admin, Admin, and User.",
+                "Software versioning and Super Admin changelog."
+            ]
+        }
+    ]
+}

@@ -101,6 +101,15 @@
         remove(index) {
             this.assignees.splice(index, 1);
         },
+        requestRemoveAssignee(index) {
+            const assignee = this.assignees[index];
+            const name = this.labelFor(assignee ? assignee.user_id : null);
+            requestRemoveConfirm({
+                title: 'Remove this user?',
+                message: 'Remove ' + name + ' from the project assignment list.',
+                onConfirm: () => this.remove(index),
+            });
+        },
         labelFor(userId) {
             const user = this.users.find(u => String(u.id) === String(userId));
             return user ? user.name : 'Unknown user';
@@ -149,7 +158,7 @@
                         :class="assignee.is_enabled !== false ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'"
                         @click="assignee.is_enabled = !(assignee.is_enabled !== false)"
                         x-text="assignee.is_enabled !== false ? 'Disable' : 'Enable'"></button>
-                <button type="button" class="rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-700" @click="remove(index)">Remove</button>
+                <button type="button" class="rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-700" @click="requestRemoveAssignee(index)">Remove</button>
             </div>
         </template>
         <p x-show="assignees.length === 0" class="rounded-2xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-muted">No users assigned yet.</p>

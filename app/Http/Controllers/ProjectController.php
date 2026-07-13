@@ -101,6 +101,8 @@ class ProjectController extends Controller
     {
         $this->authorizeView($project);
 
+        $user = auth()->user();
+
         $project->load([
             'category',
             'company',
@@ -111,6 +113,13 @@ class ProjectController extends Controller
             'users.department',
             'tasks' => fn ($query) => $query->with(['assignees.designation'])->orderBy('sort_order')->orderBy('starts_at'),
         ]);
+
+        if (! $user->canManageUsers()) {
+            $project->setRelation(
+                'tasks',
+                $project->tasks->filter(fn ($task) => $task->isAssignedTo($user))->values()
+            );
+        }
 
         $this->activityLogger->forModel(
             action: 'viewed',
@@ -125,8 +134,8 @@ class ProjectController extends Controller
 
         return view('projects.show', [
             'project' => $project,
-            'canManage' => auth()->user()->canManageUsers(),
-            'canEdit' => $project->canBeEditedBy(auth()->user()),
+            'canManage' => $user->canManageUsers(),
+            'canEdit' => $project->canBeEditedBy($user),
         ]);
     }
 

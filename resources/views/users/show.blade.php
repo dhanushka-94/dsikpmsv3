@@ -212,7 +212,7 @@
                                     <p class="mt-0.5 text-xs text-muted">
                                         {{ $task->project?->name ?? '—' }}
                                         · {{ $task->priority->label() }}
-                                        · {{ $task->starts_at->format('Y-m-d') }} → {{ $task->ends_at->format('Y-m-d') }}
+                                        · {{ dsi_datetime($task->starts_at) }} → {{ dsi_datetime($task->ends_at) }}
                                     </p>
                                 </div>
                                 <span class="shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-bold {{ $task->status->badgeClasses() }}">{{ $task->status->label() }}</span>

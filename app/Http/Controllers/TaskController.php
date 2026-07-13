@@ -18,15 +18,98 @@ class TaskController extends Controller
 {
     public function __construct(private ActivityLogger $activityLogger) {}
 
+    public function index(Request $request): View
+    {
+        $user = $request->user();
+
+        $projects = $this->visibleProjects($user);
+
+        $tasks = $this->visibleTasksQuery($user)
+            ->with(['project', 'assignees.designation'])
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
+            ->when($request->filled('priority'), fn ($q) => $q->where('priority', $request->string('priority')))
+            ->when($request->filled('project_id'), fn ($q) => $q->where('project_id', $request->integer('project_id')))
+            ->orderByRaw("CASE status WHEN 'todo' THEN 1 WHEN 'in_progress' THEN 2 WHEN 'review' THEN 3 WHEN 'done' THEN 4 ELSE 5 END")
+            ->orderBy('ends_at')
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('tasks.index', [
+            'tasks' => $tasks,
+            'statuses' => TaskStatus::options(),
+            'priorities' => TaskPriority::options(),
+            'projects' => $projects,
+            'canCreate' => $user->canManageUsers() || $projects->contains(fn (Project $project) => $project->canBeEditedBy($user)),
+        ]);
+    }
+
+    public function globalBoard(Request $request): View
+    {
+        $user = $request->user();
+        $projectId = $request->integer('project_id') ?: null;
+
+        $taskCollection = $this->visibleTasksQuery($user)
+            ->with(['project', 'assignees'])
+            ->when($projectId, fn ($q) => $q->where('project_id', $projectId))
+            ->orderBy('sort_order')
+            ->get();
+
+        $columns = collect(TaskStatus::boardColumns())->mapWithKeys(function (TaskStatus $status) use ($taskCollection) {
+            return [
+                $status->value => $taskCollection
+                    ->where('status', $status)
+                    ->sortBy('sort_order')
+                    ->values(),
+            ];
+        });
+
+        return view('tasks.global-board', [
+            'columns' => $columns,
+            'statuses' => TaskStatus::options(),
+            'projects' => $this->visibleProjects($user),
+            'selectedProjectId' => $projectId,
+            'canDrag' => true,
+            'user' => $user,
+        ]);
+    }
+
+    public function quickAccess(Request $request): View
+    {
+        $user = $request->user();
+        $projects = $this->visibleProjects($user)->take(8);
+        $openTasks = $this->visibleTasksQuery($user)
+            ->with('project')
+            ->where('status', '!=', TaskStatus::Done)
+            ->orderBy('ends_at')
+            ->limit(6)
+            ->get();
+
+        return view('tasks.quick-access', [
+            'projects' => $projects,
+            'openTasks' => $openTasks,
+            'canManage' => $user->canManageUsers(),
+            'canCreateTask' => $user->canManageUsers() || $projects->contains(fn (Project $project) => $project->canBeEditedBy($user)),
+        ]);
+    }
+
     public function board(Project $project): View
     {
         $this->authorizeView($project);
 
+        $user = auth()->user();
         $project->load(['users', 'tasks.assignees']);
+        $tasks = $this->visibleTasks($project, $user);
 
-        $columns = collect(TaskStatus::boardColumns())->mapWithKeys(function (TaskStatus $status) use ($project) {
+        $columns = collect(TaskStatus::boardColumns())->mapWithKeys(function (TaskStatus $status) use ($tasks) {
             return [
-                $status->value => $project->tasks
+                $status->value => $tasks
                     ->where('status', $status)
                     ->sortBy('sort_order')
                     ->values(),
@@ -38,14 +121,14 @@ class TaskController extends Controller
             subject: $project,
             description: 'Viewed task board for project "'.$project->name.'"',
             module: 'tasks',
-            properties: ['tasks_count' => $project->tasks->count()],
+            properties: ['tasks_count' => $tasks->count()],
         );
 
         return view('tasks.board', [
             'project' => $project,
             'columns' => $columns,
             'statuses' => TaskStatus::options(),
-            'canManage' => $project->canBeEditedBy(auth()->user()),
+            'canManage' => $project->canBeEditedBy($user),
         ]);
     }
 
@@ -53,11 +136,11 @@ class TaskController extends Controller
     {
         $this->authorizeView($project);
 
+        $user = auth()->user();
         $project->load(['tasks.assignees']);
+        $tasks = $this->visibleTasks($project, $user)->sortBy('starts_at')->values();
 
-        $ganttTasks = $project->tasks
-            ->sortBy('starts_at')
-            ->values()
+        $ganttTasks = $tasks
             ->map(fn (Task $task) => [
                 'id' => (string) $task->id,
                 'name' => $task->title,
@@ -72,14 +155,14 @@ class TaskController extends Controller
             subject: $project,
             description: 'Viewed Gantt chart for project "'.$project->name.'"',
             module: 'tasks',
-            properties: ['tasks_count' => $project->tasks->count()],
+            properties: ['tasks_count' => $tasks->count()],
         );
 
         return view('tasks.gantt', [
             'project' => $project,
             'ganttTasks' => $ganttTasks,
-            'tasks' => $project->tasks->sortBy('starts_at')->values(),
-            'canManage' => $project->canBeEditedBy(auth()->user()),
+            'tasks' => $tasks,
+            'canManage' => $project->canBeEditedBy($user),
         ]);
     }
 
@@ -208,8 +291,8 @@ class TaskController extends Controller
 
     public function updateStatus(Request $request, Task $task): JsonResponse|RedirectResponse
     {
-        $task->load('project');
-        $this->authorizeEdit($task->project);
+        $task->load(['project', 'assignees']);
+        $this->authorizeTaskAccess($task);
 
         $validated = $request->validate([
             'status' => ['required', Rule::in(array_keys(TaskStatus::options()))],
@@ -370,5 +453,62 @@ class TaskController extends Controller
     private function authorizeEdit(Project $project): void
     {
         abort_unless($project->canBeEditedBy(auth()->user()), 403);
+    }
+
+    private function authorizeTaskAccess(Task $task): void
+    {
+        $user = auth()->user();
+
+        abort_unless(
+            $user->canManageUsers()
+            || $task->project->canBeEditedBy($user)
+            || $task->isAssignedTo($user),
+            403
+        );
+    }
+
+    /**
+     * Admins see all project tasks. Regular users only see tasks assigned to them.
+     */
+    private function visibleTasks(Project $project, User $user)
+    {
+        $tasks = $project->tasks;
+
+        if ($user->canManageUsers()) {
+            return $tasks->values();
+        }
+
+        return $tasks
+            ->filter(fn (Task $task) => $task->isAssignedTo($user))
+            ->values();
+    }
+
+    private function visibleTasksQuery(User $user)
+    {
+        return Task::query()
+            ->when(! $user->canManageUsers(), function ($query) use ($user) {
+                $query->whereHas('assignees', function ($q) use ($user) {
+                    $q->where('users.id', $user->id)
+                        ->where('task_user.is_enabled', true);
+                });
+            });
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, Project>
+     */
+    private function visibleProjects(User $user)
+    {
+        return Project::query()
+            ->with('users')
+            ->when(! $user->canManageUsers(), function ($query) use ($user) {
+                $query->whereHas('users', function ($q) use ($user) {
+                    $q->where('users.id', $user->id)
+                        ->where('project_user.is_enabled', true);
+                });
+            })
+            ->orderByDesc('year')
+            ->orderBy('name')
+            ->get();
     }
 }

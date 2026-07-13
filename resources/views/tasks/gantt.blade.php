@@ -60,8 +60,8 @@
                                 <td class="px-4 py-3"><span class="rounded-full px-2.5 py-1 text-xs font-bold {{ $task->priority->badgeClasses() }}">{{ $task->priority->label() }}</span></td>
                                 <td class="px-4 py-3"><span class="rounded-full px-2.5 py-1 text-xs font-bold {{ $task->status->badgeClasses() }}">{{ $task->status->label() }}</span></td>
                                 <td class="px-4 py-3">{{ $task->assigneeNames() ?: '—' }}</td>
-                                <td class="px-4 py-3 whitespace-nowrap">{{ $task->starts_at->format('Y-m-d H:i') }}</td>
-                                <td class="px-4 py-3 whitespace-nowrap">{{ $task->ends_at->format('Y-m-d H:i') }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap">{{ dsi_datetime($task->starts_at) }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap">{{ dsi_datetime($task->ends_at) }}</td>
                             </tr>
                         @endforeach
                     </tbody>

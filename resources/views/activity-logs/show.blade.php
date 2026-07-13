@@ -14,7 +14,7 @@
             <dl class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <dt class="text-xs font-bold uppercase tracking-wider text-muted">When</dt>
-                    <dd class="mt-1 font-semibold">{{ $log->created_at->format('Y-m-d H:i:s') }}</dd>
+                    <dd class="mt-1 font-semibold">{{ dsi_datetimesec($log->created_at) }}</dd>
                 </div>
                 <div>
                     <dt class="text-xs font-bold uppercase tracking-wider text-muted">User</dt>

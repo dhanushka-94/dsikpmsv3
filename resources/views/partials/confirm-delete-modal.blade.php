@@ -52,7 +52,7 @@
                     Cancel
                 </button>
                 <button type="button" class="rounded-2xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-red-700" @click="confirm()">
-                    <span x-text="requireMath ? 'Verify & delete' : 'Delete'"></span>
+                    <span x-text="confirmLabel"></span>
                 </button>
             </div>
         </div>
@@ -67,19 +67,24 @@
     function confirmDeleteDialog() {
         return {
             open: false,
-            title: 'Confirm delete',
+            title: 'Confirm',
             message: 'This action cannot be undone.',
+            confirmLabel: 'Confirm',
             requireMath: false,
             mathA: 0,
             mathB: 0,
             answer: '',
             error: '',
             form: null,
+            onConfirm: null,
             ask(detail) {
                 this.form = detail.form || null;
-                this.title = detail.title || 'Confirm delete';
+                this.onConfirm = typeof detail.onConfirm === 'function' ? detail.onConfirm : null;
+                this.title = detail.title || 'Confirm';
                 this.message = detail.message || 'This action cannot be undone.';
                 this.requireMath = !!detail.requireMath;
+                this.confirmLabel = detail.confirmLabel
+                    || (this.requireMath ? 'Verify & delete' : (this.form ? 'Delete' : 'Remove'));
                 this.answer = '';
                 this.error = '';
                 if (this.requireMath) {
@@ -96,11 +101,12 @@
             close() {
                 this.open = false;
                 this.form = null;
+                this.onConfirm = null;
                 this.error = '';
                 this.answer = '';
             },
             confirm() {
-                if (!this.form) return;
+                if (!this.form && !this.onConfirm) return;
 
                 if (this.requireMath) {
                     const expected = this.mathA + this.mathB;
@@ -113,14 +119,25 @@
                         return;
                     }
 
-                    this.ensureHidden('confirm_a', this.mathA);
-                    this.ensureHidden('confirm_b', this.mathB);
-                    this.ensureHidden('confirm_answer', this.answer);
+                    if (this.form) {
+                        this.ensureHidden('confirm_a', this.mathA);
+                        this.ensureHidden('confirm_b', this.mathB);
+                        this.ensureHidden('confirm_answer', this.answer);
+                    }
                 }
 
                 const form = this.form;
+                const onConfirm = this.onConfirm;
                 this.close();
-                form.submit();
+
+                if (form) {
+                    form.submit();
+                    return;
+                }
+
+                if (onConfirm) {
+                    onConfirm();
+                }
             },
             ensureHidden(name, value) {
                 let input = this.form.querySelector(`input[name="${name}"]`);
@@ -143,9 +160,22 @@
                 form,
                 title: options.title || 'Confirm delete',
                 message: options.message || 'This action cannot be undone.',
+                confirmLabel: options.confirmLabel || (options.requireMath ? 'Verify & delete' : 'Delete'),
                 requireMath: !!options.requireMath,
             },
         }));
         return false;
+    }
+
+    function requestRemoveConfirm(options = {}) {
+        window.dispatchEvent(new CustomEvent('confirm-delete', {
+            detail: {
+                title: options.title || 'Remove this item?',
+                message: options.message || 'Are you sure you want to remove this?',
+                confirmLabel: options.confirmLabel || 'Remove',
+                requireMath: !!options.requireMath,
+                onConfirm: options.onConfirm,
+            },
+        }));
     }
 </script>

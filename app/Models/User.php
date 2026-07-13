@@ -99,6 +99,13 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function kpis(): BelongsToMany
+    {
+        return $this->belongsToMany(Kpi::class)
+            ->withPivot('weightage')
+            ->withTimestamps();
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->role === UserRole::SuperAdmin;

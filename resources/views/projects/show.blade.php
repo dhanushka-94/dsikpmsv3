@@ -88,7 +88,7 @@
                                     <span class="rounded-full px-2 py-0.5 text-[10px] font-bold {{ $task->priority->badgeClasses() }}">{{ $task->priority->label() }}</span>
                                 </div>
                                 <p class="mt-1 text-xs text-muted">
-                                    {{ $task->starts_at->format('Y-m-d H:i') }} → {{ $task->ends_at->format('Y-m-d H:i') }}
+                                    {{ dsi_datetime($task->starts_at) }} → {{ dsi_datetime($task->ends_at) }}
                                 </p>
                                 @if($task->assignees->isNotEmpty())
                                     <p class="mt-2 text-xs text-slate-600">
