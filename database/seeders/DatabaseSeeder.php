@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Enums\UserTitle;
 use App\Models\Department;
 use App\Models\Designation;
+use App\Models\ProjectCategory;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -32,6 +33,16 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Officer', 'code' => 'OFF', 'sort_order' => 5],
         ])->map(fn (array $data) => Designation::create($data + [
             'description' => $data['name'].' designation',
+            'is_active' => true,
+        ]));
+
+        collect([
+            ['name' => 'Strategic Initiatives', 'code' => 'SI', 'sort_order' => 1],
+            ['name' => 'Operations Improvement', 'code' => 'OI', 'sort_order' => 2],
+            ['name' => 'Digital Transformation', 'code' => 'DT', 'sort_order' => 3],
+            ['name' => 'Compliance & Quality', 'code' => 'CQ', 'sort_order' => 4],
+        ])->each(fn (array $data) => ProjectCategory::create($data + [
+            'description' => $data['name'].' projects',
             'is_active' => true,
         ]));
 
