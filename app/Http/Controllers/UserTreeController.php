@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\UserRole;
+use App\Enums\ProjectPermission;
 use App\Models\Department;
 use App\Models\Designation;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -19,7 +20,14 @@ class UserTreeController extends Controller
 
         $users = User::query()
             ->with(['department.parent', 'designation', 'parent'])
-            ->withCount('projects')
+            ->withCount([
+                'projects as projects_count' => function ($query) {
+                    $query->where('project_user.is_enabled', true);
+                },
+                'tasks as tasks_count' => function ($query) {
+                    $query->where('task_user.is_enabled', true);
+                },
+            ])
             ->where('role', '!=', 'super_admin')
             ->when($departmentId, fn ($q) => $q->where('department_id', $departmentId))
             ->when($designationId, fn ($q) => $q->where('designation_id', $designationId))
@@ -38,6 +46,75 @@ class UserTreeController extends Controller
                 'designation_id' => $designationId,
             ],
         ]);
+    }
+
+    public function projects(User $user): JsonResponse
+    {
+        $this->authorizeTreeUser($user);
+
+        $items = $user->projects()
+            ->wherePivot('is_enabled', true)
+            ->with(['category', 'department'])
+            ->orderByDesc('year')
+            ->orderBy('name')
+            ->get()
+            ->map(fn ($project) => [
+                'id' => $project->id,
+                'title' => $project->name,
+                'meta' => collect([
+                    $project->year,
+                    $project->reference_number,
+                    $project->category?->name,
+                ])->filter()->implode(' · '),
+                'badge' => $project->status->label(),
+                'badge_class' => $project->status->badgeClasses(),
+                'dates' => collect([
+                    optional($project->start_date)->format('Y-m-d'),
+                    optional($project->end_date)->format('Y-m-d'),
+                ])->filter()->implode(' → ') ?: null,
+                'extra' => ProjectPermission::from($project->pivot->permission)->label(),
+                'url' => route('projects.show', $project),
+            ]);
+
+        return response()->json([
+            'type' => 'projects',
+            'user' => $user->displayName(),
+            'items' => $items,
+        ]);
+    }
+
+    public function tasks(User $user): JsonResponse
+    {
+        $this->authorizeTreeUser($user);
+
+        $items = $user->tasks()
+            ->wherePivot('is_enabled', true)
+            ->with(['project'])
+            ->orderBy('starts_at')
+            ->get()
+            ->map(fn ($task) => [
+                'id' => $task->id,
+                'title' => $task->title,
+                'meta' => $task->project?->name,
+                'badge' => $task->status->label(),
+                'badge_class' => $task->status->badgeClasses(),
+                'dates' => $task->starts_at->format('Y-m-d H:i').' → '.$task->ends_at->format('Y-m-d H:i'),
+                'extra' => $task->priority->label(),
+                'url' => $task->project
+                    ? route('projects.tasks.board', $task->project)
+                    : null,
+            ]);
+
+        return response()->json([
+            'type' => 'tasks',
+            'user' => $user->displayName(),
+            'items' => $items,
+        ]);
+    }
+
+    private function authorizeTreeUser(User $user): void
+    {
+        abort_if($user->isSuperAdmin(), 404);
     }
 
     /**

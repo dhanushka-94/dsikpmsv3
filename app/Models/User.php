@@ -76,7 +76,14 @@ class User extends Authenticatable
     public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class)
-            ->withPivot('permission')
+            ->withPivot(['permission', 'is_enabled'])
+            ->withTimestamps();
+    }
+
+    public function tasks(): BelongsToMany
+    {
+        return $this->belongsToMany(Task::class)
+            ->withPivot('is_enabled')
             ->withTimestamps();
     }
 

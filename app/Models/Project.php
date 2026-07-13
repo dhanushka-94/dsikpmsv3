@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
 {
@@ -54,8 +55,18 @@ class Project extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
-            ->withPivot('permission')
+            ->withPivot(['permission', 'is_enabled'])
             ->withTimestamps();
+    }
+
+    public function enabledUsers(): BelongsToMany
+    {
+        return $this->users()->wherePivot('is_enabled', true);
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
     }
 
     public function permissionFor(?User $user): ?ProjectPermission
@@ -66,7 +77,7 @@ class Project extends Model
 
         $assignment = $this->users->firstWhere('id', $user->id);
 
-        if (! $assignment) {
+        if (! $assignment || ! (bool) $assignment->pivot->is_enabled) {
             return null;
         }
 
@@ -76,10 +87,15 @@ class Project extends Model
     public function isAssignedTo(User $user): bool
     {
         if ($this->relationLoaded('users')) {
-            return $this->users->contains('id', $user->id);
+            $assignment = $this->users->firstWhere('id', $user->id);
+
+            return $assignment && (bool) $assignment->pivot->is_enabled;
         }
 
-        return $this->users()->where('users.id', $user->id)->exists();
+        return $this->users()
+            ->where('users.id', $user->id)
+            ->wherePivot('is_enabled', true)
+            ->exists();
     }
 
     public function canBeEditedBy(User $user): bool

@@ -88,7 +88,7 @@
         },
         add(userId) {
             if (!userId) return;
-            this.assignees.push({ user_id: String(userId), permission: 'viewer' });
+            this.assignees.push({ user_id: String(userId), permission: 'viewer', is_enabled: true });
             this.search = '';
         },
         remove(index) {
@@ -107,7 +107,7 @@
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
             <h2 class="text-base font-bold">Assign users</h2>
-            <p class="mt-1 text-sm text-muted">Default permission is Viewer. Switch to Editor when needed.</p>
+            <p class="mt-1 text-sm text-muted">Default permission is Viewer. Disable a user to revoke access without removing them.</p>
         </div>
         <span class="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700" x-text="assignees.length + ' assigned'"></span>
     </div>
@@ -124,10 +124,12 @@
 
     <div class="mt-4 space-y-3">
         <template x-for="(assignee, index) in assignees" :key="assignee.user_id + '-' + index">
-            <div class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:flex-row sm:items-center">
+            <div class="flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center"
+                 :class="assignee.is_enabled !== false ? 'border-slate-200 bg-slate-50/80' : 'border-slate-200 bg-slate-100 opacity-70'">
                 <input type="hidden" :name="'assignees[' + index + '][user_id]'" :value="assignee.user_id">
+                <input type="hidden" :name="'assignees[' + index + '][is_enabled]'" :value="assignee.is_enabled !== false ? 1 : 0">
                 <div class="min-w-0 flex-1">
-                    <p class="font-semibold" x-text="labelFor(assignee.user_id)"></p>
+                    <p class="font-semibold" :class="assignee.is_enabled === false && 'line-through text-slate-500'" x-text="labelFor(assignee.user_id)"></p>
                     <p class="text-xs text-muted" x-text="metaFor(assignee.user_id)"></p>
                 </div>
                 <select :name="'assignees[' + index + '][permission]'" x-model="assignee.permission" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold">
@@ -135,6 +137,11 @@
                         <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
                 </select>
+                <button type="button"
+                        class="rounded-xl px-3 py-2 text-xs font-bold"
+                        :class="assignee.is_enabled !== false ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'"
+                        @click="assignee.is_enabled = !(assignee.is_enabled !== false)"
+                        x-text="assignee.is_enabled !== false ? 'Disable' : 'Enable'"></button>
                 <button type="button" class="rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-700" @click="remove(index)">Remove</button>
             </div>
         </template>

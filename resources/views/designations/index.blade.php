@@ -43,7 +43,7 @@
                         <td class="px-4 py-3">
                             <div class="flex justify-end gap-2">
                                 <a href="{{ route('designations.edit', $designation) }}" class="rounded-xl border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700">Edit</a>
-                                <form method="POST" action="{{ route('designations.destroy', $designation) }}" onsubmit="return confirm('Delete this designation?')">
+                                <form method="POST" action="{{ route('designations.destroy', $designation) }}" onsubmit="return requestDeleteConfirm(event, { title: 'Delete this designation?', message: 'This designation will be permanently removed.' })">
                                     @csrf
                                     @method('DELETE')
                                     <button class="rounded-xl border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700">Delete</button>

@@ -44,53 +44,69 @@
         </div>
     </form>
 
-    <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-left text-sm">
-                <thead class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-muted">
-                    <tr>
-                        <th class="px-4 py-3">Project</th>
-                        <th class="px-4 py-3">Year</th>
-                        <th class="px-4 py-3">Category</th>
-                        <th class="px-4 py-3">Department</th>
-                        <th class="px-4 py-3">Status</th>
-                        <th class="px-4 py-3">Team</th>
-                        <th class="px-4 py-3 text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse($projects as $project)
-                        <tr class="hover:bg-slate-50/70">
-                            <td class="px-4 py-3">
-                                <a href="{{ route('projects.show', $project) }}" class="font-semibold hover:text-brand-700">{{ $project->name }}</a>
-                                <p class="text-xs text-muted">{{ $project->reference_number ?? 'No reference' }}</p>
-                            </td>
-                            <td class="px-4 py-3 font-semibold">{{ $project->year }}</td>
-                            <td class="px-4 py-3">{{ $project->category?->name ?? '—' }}</td>
-                            <td class="px-4 py-3">{{ $project->department?->displayName() ?? '—' }}</td>
-                            <td class="px-4 py-3">
-                                <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ $project->status->badgeClasses() }}">
-                                    {{ $project->status->label() }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3">{{ $project->users_count }}</td>
-                            <td class="px-4 py-3">
-                                <div class="flex justify-end gap-2">
-                                    <a href="{{ route('projects.show', $project) }}" class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold">View</a>
-                                    @if($project->canBeEditedBy(auth()->user()))
-                                        <a href="{{ route('projects.edit', $project) }}" class="rounded-xl border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700">Edit</a>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="7" class="px-4 py-10 text-center text-muted">No projects found.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if($projects->hasPages())
-            <div class="border-t border-slate-100 px-4 py-3">{{ $projects->links() }}</div>
-        @endif
+    <div class="space-y-4">
+        @forelse($projects as $project)
+            <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <a href="{{ route('projects.show', $project) }}" class="text-lg font-extrabold tracking-tight hover:text-brand-700">{{ $project->name }}</a>
+                            <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ $project->status->badgeClasses() }}">{{ $project->status->label() }}</span>
+                            <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">{{ $project->year }}</span>
+                        </div>
+                        <div class="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+                            <div>
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-muted">Tasks</p>
+                                <p class="font-semibold">{{ $project->tasks_count }}</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-muted">Reference</p>
+                                <p class="font-semibold">{{ $project->reference_number ?? '—' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-muted">Start</p>
+                                <p class="font-semibold">{{ optional($project->start_date)->format('Y-m-d') ?? '—' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-muted">End</p>
+                                <p class="font-semibold">{{ optional($project->end_date)->format('Y-m-d') ?? '—' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ route('projects.show', $project) }}" class="rounded-xl bg-ink px-3 py-2 text-xs font-bold text-white">View</a>
+                        <a href="{{ route('projects.tasks.board', $project) }}" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold">Board</a>
+                        <a href="{{ route('projects.tasks.gantt', $project) }}" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold">Gantt</a>
+                        @if($project->canBeEditedBy(auth()->user()))
+                            <a href="{{ route('projects.edit', $project) }}" class="rounded-xl border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-700">Edit</a>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="mt-5 border-t border-slate-100 pt-4">
+                    <h3 class="mb-3 text-sm font-bold">Assigned users</h3>
+
+                    <div class="flex flex-wrap gap-2">
+                        @forelse($project->users as $member)
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+                                <p class="truncate text-xs font-bold text-ink">{{ $member->displayName() }}</p>
+                                <p class="truncate text-[10px] font-semibold text-muted">{{ $member->designation?->name ?? '—' }}</p>
+                            </div>
+                        @empty
+                            <p class="text-sm text-muted">No users assigned yet.</p>
+                        @endforelse
+                    </div>
+                </div>
+            </article>
+        @empty
+            <div class="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center shadow-sm">
+                <p class="font-semibold">No projects found.</p>
+            </div>
+        @endforelse
     </div>
+
+    @if($projects->hasPages())
+        <div class="mt-5">{{ $projects->links() }}</div>
+    @endif
 @endsection

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ProjectStatus;
+use App\Enums\TaskStatus;
 use App\Enums\UserRole;
 use App\Enums\UserTitle;
 use App\Mail\TemporaryPasswordMail;
@@ -29,6 +31,14 @@ class UserController extends Controller
     {
         $users = User::query()
             ->with(['department', 'designation', 'parent'])
+            ->withCount([
+                'projects as projects_count' => function ($query) {
+                    $query->where('project_user.is_enabled', true);
+                },
+                'tasks as tasks_count' => function ($query) {
+                    $query->where('task_user.is_enabled', true);
+                },
+            ])
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
                 $query->where(function ($q) use ($search) {
@@ -102,9 +112,67 @@ class UserController extends Controller
 
     public function show(User $user): View
     {
-        $user->load(['department', 'designation', 'parent', 'children']);
+        return $this->renderProfile($user, manage: true);
+    }
 
-        return view('users.show', compact('user'));
+    public function profile(User $user): View
+    {
+        return $this->renderProfile($user, manage: auth()->user()->canManageUsers());
+    }
+
+    private function renderProfile(User $user, bool $manage): View
+    {
+        if ($user->isSuperAdmin() && ! auth()->user()->isSuperAdmin()) {
+            abort(404);
+        }
+
+        $user->load(['department.parent', 'designation', 'parent']);
+
+        $projects = $user->projects()
+            ->wherePivot('is_enabled', true)
+            ->with(['category', 'department'])
+            ->orderByDesc('year')
+            ->orderBy('name')
+            ->get();
+
+        $tasks = $user->tasks()
+            ->wherePivot('is_enabled', true)
+            ->with(['project'])
+            ->orderByDesc('starts_at')
+            ->get();
+
+        $projectStats = [
+            'total' => $projects->count(),
+            'ongoing' => $projects->filter(fn ($project) => $project->status === ProjectStatus::Ongoing)->count(),
+            'on_hold' => $projects->filter(fn ($project) => $project->status === ProjectStatus::OnHold)->count(),
+            'completed' => $projects->filter(fn ($project) => $project->status === ProjectStatus::Completed)->count(),
+        ];
+        $projectStats['percent'] = $projectStats['total'] > 0
+            ? (int) round(($projectStats['completed'] / $projectStats['total']) * 100)
+            : 0;
+
+        $taskStats = [
+            'total' => $tasks->count(),
+            'todo' => $tasks->filter(fn ($task) => $task->status === TaskStatus::Todo)->count(),
+            'in_progress' => $tasks->filter(fn ($task) => $task->status === TaskStatus::InProgress)->count(),
+            'review' => $tasks->filter(fn ($task) => $task->status === TaskStatus::Review)->count(),
+            'done' => $tasks->filter(fn ($task) => $task->status === TaskStatus::Done)->count(),
+        ];
+        $taskStats['percent'] = $taskStats['total'] > 0
+            ? (int) round(($taskStats['done'] / $taskStats['total']) * 100)
+            : 0;
+
+        $user->projects_count = $projectStats['total'];
+        $user->tasks_count = $taskStats['total'];
+
+        return view('users.show', [
+            'user' => $user,
+            'projects' => $projects,
+            'tasks' => $tasks,
+            'projectStats' => $projectStats,
+            'taskStats' => $taskStats,
+            'canManage' => $manage && auth()->user()->canManageUsers(),
+        ]);
     }
 
     public function edit(User $user): View

@@ -50,7 +50,7 @@
                         <td class="px-4 py-3">
                             <div class="flex justify-end gap-2">
                                 <a href="{{ route('departments.edit', $department) }}" class="rounded-xl border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700">Edit</a>
-                                <form method="POST" action="{{ route('departments.destroy', $department) }}" onsubmit="return confirm('Delete this department?')">
+                                <form method="POST" action="{{ route('departments.destroy', $department) }}" onsubmit="return requestDeleteConfirm(event, { title: 'Delete this department?', message: 'This department will be permanently removed.' })">
                                     @csrf
                                     @method('DELETE')
                                     <button class="rounded-xl border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700">Delete</button>

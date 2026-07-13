@@ -11,9 +11,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @stack('styles')
 </head>
 <body class="min-h-screen bg-surface font-sans text-ink antialiased">
     <div class="min-h-screen lg:flex" x-data="{ sidebarOpen: false }">
+        @include('partials.confirm-delete-modal')
         {{-- Mobile overlay --}}
         <div
             x-show="sidebarOpen"
@@ -146,5 +148,6 @@
             </main>
         </div>
     </div>
+    @stack('scripts')
 </body>
 </html>

@@ -25,10 +25,10 @@ class ProjectController extends Controller
         $user = $request->user();
 
         $projects = Project::query()
-            ->with(['category', 'department', 'users'])
-            ->withCount('users')
+            ->with(['category', 'department', 'users.designation'])
+            ->withCount(['users', 'tasks'])
             ->when(! $user->canManageUsers(), function ($query) use ($user) {
-                $query->whereHas('users', fn ($q) => $q->where('users.id', $user->id));
+                $query->whereHas('users', fn ($q) => $q->where('users.id', $user->id)->where('project_user.is_enabled', true));
             })
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search');
@@ -96,7 +96,14 @@ class ProjectController extends Controller
     {
         $this->authorizeView($project);
 
-        $project->load(['category', 'department.parent', 'creator', 'users.designation', 'users.department']);
+        $project->load([
+            'category',
+            'department.parent',
+            'creator',
+            'users.designation',
+            'users.department',
+            'tasks' => fn ($query) => $query->with(['assignees.designation'])->orderBy('sort_order')->orderBy('starts_at'),
+        ]);
 
         return view('projects.show', [
             'project' => $project,
@@ -119,7 +126,7 @@ class ProjectController extends Controller
         $this->authorizeEdit($project);
 
         $validated = $this->validateProject($request, $project);
-        $assignees = $this->validatedAssignees($request);
+        $assignees = $this->validatedAssignees($request, $project);
         $before = $this->activityLogger->snapshot($project);
 
         $project->update($validated);
@@ -141,9 +148,19 @@ class ProjectController extends Controller
             ->with('success', 'Project updated successfully.');
     }
 
-    public function destroy(Project $project): RedirectResponse
+    public function destroy(Request $request, Project $project): RedirectResponse
     {
         $this->authorizeManage();
+
+        $validated = $request->validate([
+            'confirm_a' => ['required', 'integer', 'min:1', 'max:12'],
+            'confirm_b' => ['required', 'integer', 'min:1', 'max:12'],
+            'confirm_answer' => ['required', 'integer'],
+        ]);
+
+        if ((int) $validated['confirm_a'] + (int) $validated['confirm_b'] !== (int) $validated['confirm_answer']) {
+            return back()->with('error', 'Incorrect verification answer. Project was not deleted.');
+        }
 
         $name = $project->name;
         $snapshot = $project->toArray();
@@ -170,6 +187,7 @@ class ProjectController extends Controller
                 $selectedAssignees[] = [
                     'user_id' => $user->id,
                     'permission' => $user->pivot->permission,
+                    'is_enabled' => (bool) $user->pivot->is_enabled,
                 ];
             }
         }
@@ -186,7 +204,11 @@ class ProjectController extends Controller
             'years' => Project::yearOptions(),
             'statuses' => ProjectStatus::options(),
             'permissions' => ProjectPermission::options(),
-            'selectedAssignees' => old('assignees', $selectedAssignees),
+            'selectedAssignees' => collect(old('assignees', $selectedAssignees))->map(fn ($row) => [
+                'user_id' => (string) $row['user_id'],
+                'permission' => $row['permission'] ?? ProjectPermission::Viewer->value,
+                'is_enabled' => filter_var($row['is_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN),
+            ])->values()->all(),
         ];
     }
 
@@ -214,13 +236,18 @@ class ProjectController extends Controller
         return $validated;
     }
 
-    private function validatedAssignees(Request $request): array
+    private function validatedAssignees(Request $request, ?Project $project = null): array
     {
         $request->validate([
             'assignees' => ['nullable', 'array'],
             'assignees.*.user_id' => ['required', 'distinct', 'exists:users,id'],
             'assignees.*.permission' => ['required', Rule::in(array_keys(ProjectPermission::options()))],
+            'assignees.*.is_enabled' => ['nullable', 'boolean'],
         ]);
+
+        $existing = $project
+            ? $project->users()->get()->keyBy('id')
+            : collect();
 
         $assignees = [];
 
@@ -236,10 +263,40 @@ class ProjectController extends Controller
 
             $assignees[$userId] = [
                 'permission' => $row['permission'] ?? ProjectPermission::Viewer->value,
+                'is_enabled' => array_key_exists('is_enabled', $row)
+                    ? filter_var($row['is_enabled'], FILTER_VALIDATE_BOOLEAN)
+                    : (bool) ($existing->get($userId)?->pivot?->is_enabled ?? true),
             ];
         }
 
         return $assignees;
+    }
+
+    public function toggleUser(Request $request, Project $project, User $user): RedirectResponse
+    {
+        $this->authorizeEdit($project);
+
+        $assignment = $project->users()->where('users.id', $user->id)->first();
+
+        if (! $assignment) {
+            return back()->with('error', 'User is not assigned to this project.');
+        }
+
+        $enabled = ! (bool) $assignment->pivot->is_enabled;
+
+        $project->users()->updateExistingPivot($user->id, [
+            'is_enabled' => $enabled,
+        ]);
+
+        $this->activityLogger->forModel(
+            action: $enabled ? 'user_enabled' : 'user_disabled',
+            subject: $project,
+            description: ($enabled ? 'Enabled' : 'Disabled').' '.$user->displayName().' on project "'.$project->name.'"',
+            module: 'projects',
+            properties: ['user_id' => $user->id, 'is_enabled' => $enabled],
+        );
+
+        return back()->with('success', $user->displayName().' has been '.($enabled ? 'enabled' : 'disabled').'.');
     }
 
     private function authorizeManage(): void
