@@ -6,15 +6,42 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
+        Schema::create('departments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('parent_id')->nullable()->constrained('departments')->nullOnDelete();
+            $table->string('name')->unique();
+            $table->string('code')->nullable()->unique();
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->unsignedInteger('sort_order')->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('designations', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->string('code')->nullable()->unique();
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->unsignedInteger('sort_order')->default(0);
+            $table->timestamps();
+        });
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->string('title', 20)->nullable();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('epf_number')->nullable()->unique();
+            $table->foreignId('department_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('designation_id')->nullable()->constrained()->nullOnDelete();
+            $table->enum('role', ['super_admin', 'admin', 'user'])->default('user');
+            $table->foreignId('parent_user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('profile_picture')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->boolean('must_change_password')->default(true);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
@@ -37,13 +64,12 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
+        Schema::dropIfExists('designations');
+        Schema::dropIfExists('departments');
     }
 };
