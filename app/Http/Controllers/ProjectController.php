@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Enums\ProjectPermission;
 use App\Enums\ProjectStatus;
 use App\Enums\UserRole;
+use App\Models\Company;
 use App\Models\Department;
+use App\Models\Plant;
 use App\Models\Project;
 use App\Models\ProjectCategory;
 use App\Models\User;
@@ -25,7 +27,7 @@ class ProjectController extends Controller
         $user = $request->user();
 
         $projects = Project::query()
-            ->with(['category', 'department', 'users.designation'])
+            ->with(['category', 'department', 'company', 'plant', 'users.designation'])
             ->withCount(['users', 'tasks'])
             ->when(! $user->canManageUsers(), function ($query) use ($user) {
                 $query->whereHas('users', fn ($q) => $q->where('users.id', $user->id)->where('project_user.is_enabled', true));
@@ -41,6 +43,8 @@ class ProjectController extends Controller
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->when($request->filled('project_category_id'), fn ($q) => $q->where('project_category_id', $request->integer('project_category_id')))
             ->when($request->filled('department_id'), fn ($q) => $q->where('department_id', $request->integer('department_id')))
+            ->when($request->filled('company_id'), fn ($q) => $q->where('company_id', $request->integer('company_id')))
+            ->when($request->filled('plant_id'), fn ($q) => $q->where('plant_id', $request->integer('plant_id')))
             ->latest()
             ->paginate(12)
             ->withQueryString();
@@ -49,6 +53,7 @@ class ProjectController extends Controller
             'projects' => $projects,
             'categories' => ProjectCategory::ordered()->get(),
             'departments' => Department::with('parent')->ordered()->get(),
+            'companies' => Company::ordered()->get(),
             'years' => Project::yearOptions(),
             'statuses' => ProjectStatus::options(),
             'canManage' => $user->canManageUsers(),
@@ -98,6 +103,8 @@ class ProjectController extends Controller
 
         $project->load([
             'category',
+            'company',
+            'plant',
             'department.parent',
             'creator',
             'users.designation',
@@ -219,6 +226,8 @@ class ProjectController extends Controller
 
         return [
             'categories' => ProjectCategory::where('is_active', true)->ordered()->get(),
+            'companies' => Company::where('is_active', true)->ordered()->get(),
+            'plants' => Plant::where('is_active', true)->ordered()->get(['id', 'company_id', 'name']),
             'departments' => Department::with('parent')->where('is_active', true)->ordered()->get(),
             'assignableUsers' => User::query()
                 ->where('role', '!=', UserRole::SuperAdmin->value)
@@ -246,6 +255,8 @@ class ProjectController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'year' => ['required', 'integer', 'min:'.($currentYear - 5), 'max:'.($currentYear + 5)],
             'project_category_id' => ['required', 'exists:project_categories,id'],
+            'company_id' => ['required', 'exists:companies,id'],
+            'plant_id' => ['required', 'exists:plants,id'],
             'department_id' => ['required', 'exists:departments,id'],
             'reference_number' => ['nullable', 'string', 'max:100', 'unique:projects,reference_number,'.$id],
             'description' => ['nullable', 'string', 'max:5000'],
@@ -253,6 +264,11 @@ class ProjectController extends Controller
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'status' => ['required', Rule::in(array_keys(ProjectStatus::options()))],
         ]);
+
+        Plant::assertBelongsToCompany(
+            isset($validated['plant_id']) ? (int) $validated['plant_id'] : null,
+            isset($validated['company_id']) ? (int) $validated['company_id'] : null,
+        );
 
         if (empty($validated['reference_number'])) {
             $validated['reference_number'] = null;

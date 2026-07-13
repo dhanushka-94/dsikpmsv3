@@ -18,6 +18,12 @@
     >
         <form method="GET" class="mb-5 grid gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-4">
             <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, email, EPF..." class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100 md:col-span-2">
+            <select name="company_id" class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm">
+                <option value="">All companies</option>
+                @foreach($companies as $company)
+                    <option value="{{ $company->id }}" @selected((string) request('company_id') === (string) $company->id)>{{ $company->name }}</option>
+                @endforeach
+            </select>
             <select name="role" class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm">
                 <option value="">All roles</option>
                 @foreach(\App\Enums\UserRole::options() as $value => $label)
@@ -59,11 +65,13 @@
                             </div>
                         </div>
 
-                        <div class="mt-4 space-y-1 text-xs text-muted">
-                            <p><span class="font-semibold text-slate-600">EPF:</span> {{ $user->epf_number ?: '—' }}</p>
-                            <p><span class="font-semibold text-slate-600">Department:</span> {{ $user->department?->name ?? '—' }}</p>
-                            <p><span class="font-semibold text-slate-600">Designation:</span> {{ $user->designation?->name ?? '—' }}</p>
-                        </div>
+                    <div class="mt-4 space-y-1 text-xs text-muted">
+                        <p><span class="font-semibold text-slate-600">Company:</span> {{ $user->company?->name ?? '—' }}</p>
+                        <p><span class="font-semibold text-slate-600">Plant:</span> {{ $user->plant?->name ?? '—' }}</p>
+                        <p><span class="font-semibold text-slate-600">EPF:</span> {{ $user->epf_number ?: '—' }}</p>
+                        <p><span class="font-semibold text-slate-600">Department:</span> {{ $user->department?->name ?? '—' }}</p>
+                        <p><span class="font-semibold text-slate-600">Designation:</span> {{ $user->designation?->name ?? '—' }}</p>
+                    </div>
                     </a>
 
                     @unless($user->isSuperAdmin())

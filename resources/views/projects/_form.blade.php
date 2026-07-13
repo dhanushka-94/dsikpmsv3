@@ -35,6 +35,13 @@
             </select>
         </div>
 
+        @include('partials.company-plant-fields', [
+            'companies' => $companies,
+            'plants' => $plants,
+            'selectedCompanyId' => old('company_id', $project?->company_id),
+            'selectedPlantId' => old('plant_id', $project?->plant_id),
+        ])
+
         <div>
             <label class="mb-1.5 block text-sm font-semibold">Department <span class="text-brand-600">*</span></label>
             <select name="department_id" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">

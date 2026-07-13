@@ -31,6 +31,14 @@
                         <dd class="mt-1 font-semibold">{{ $project->category?->name ?? '—' }}</dd>
                     </div>
                     <div>
+                        <dt class="text-xs font-bold uppercase tracking-wider text-muted">Company</dt>
+                        <dd class="mt-1 font-semibold">{{ $project->company?->name ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-bold uppercase tracking-wider text-muted">Plant</dt>
+                        <dd class="mt-1 font-semibold">{{ $project->plant?->name ?? '—' }}</dd>
+                    </div>
+                    <div>
                         <dt class="text-xs font-bold uppercase tracking-wider text-muted">Department</dt>
                         <dd class="mt-1 font-semibold">{{ $project->department?->displayName() ?? '—' }}</dd>
                     </div>

@@ -33,6 +33,13 @@
 <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
     <h2 class="text-base font-bold">Organization</h2>
     <div class="mt-4 grid gap-4 md:grid-cols-2">
+        @include('partials.company-plant-fields', [
+            'companies' => $companies,
+            'plants' => $plants,
+            'selectedCompanyId' => old('company_id', $user?->company_id),
+            'selectedPlantId' => old('plant_id', $user?->plant_id),
+        ])
+
         <x-searchable-select
             name="designation_id"
             :options="$designations"

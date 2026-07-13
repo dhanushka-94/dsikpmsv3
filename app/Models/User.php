@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'epf_number',
+        'company_id',
+        'plant_id',
         'department_id',
         'designation_id',
         'role',
@@ -51,6 +53,16 @@ class User extends Authenticatable
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function plant(): BelongsTo
+    {
+        return $this->belongsTo(Plant::class);
     }
 
     public function designation(): BelongsTo

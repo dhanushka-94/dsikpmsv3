@@ -7,8 +7,10 @@ use App\Enums\TaskStatus;
 use App\Enums\UserRole;
 use App\Enums\UserTitle;
 use App\Mail\TemporaryPasswordMail;
+use App\Models\Company;
 use App\Models\Department;
 use App\Models\Designation;
+use App\Models\Plant;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use App\Services\TemporaryPasswordService;
@@ -30,7 +32,7 @@ class UserController extends Controller
     public function index(Request $request): View
     {
         $users = User::query()
-            ->with(['department', 'designation', 'parent'])
+            ->with(['department', 'designation', 'parent', 'company', 'plant'])
             ->withCount([
                 'projects as projects_count' => function ($query) {
                     $query->where('project_user.is_enabled', true);
@@ -49,6 +51,8 @@ class UserController extends Controller
             })
             ->when($request->filled('role'), fn ($q) => $q->where('role', $request->string('role')))
             ->when($request->filled('department_id'), fn ($q) => $q->where('department_id', $request->integer('department_id')))
+            ->when($request->filled('company_id'), fn ($q) => $q->where('company_id', $request->integer('company_id')))
+            ->when($request->filled('plant_id'), fn ($q) => $q->where('plant_id', $request->integer('plant_id')))
             ->when($request->filled('status'), function ($query) use ($request) {
                 $query->where('is_active', $request->string('status') === 'active');
             })
@@ -57,8 +61,9 @@ class UserController extends Controller
             ->withQueryString();
 
         $departments = Department::ordered()->get();
+        $companies = Company::ordered()->get();
 
-        return view('users.index', compact('users', 'departments'));
+        return view('users.index', compact('users', 'departments', 'companies'));
     }
 
     public function create(): View
@@ -126,7 +131,7 @@ class UserController extends Controller
             abort(404);
         }
 
-        $user->load(['department.parent', 'designation', 'parent']);
+        $user->load(['department.parent', 'designation', 'parent', 'company', 'plant']);
 
         $projects = $user->projects()
             ->wherePivot('is_enabled', true)
@@ -310,6 +315,8 @@ class UserController extends Controller
     private function formData(?User $exclude = null): array
     {
         return [
+            'companies' => Company::where('is_active', true)->ordered()->get(),
+            'plants' => Plant::where('is_active', true)->ordered()->get(['id', 'company_id', 'name']),
             'departments' => Department::where('is_active', true)->with('parent')->ordered()->get(),
             'designations' => Designation::where('is_active', true)->ordered()->get(),
             'parentUsers' => User::query()
@@ -358,6 +365,8 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$id],
             'epf_number' => ['nullable', 'string', 'max:50', 'unique:users,epf_number,'.$id],
+            'company_id' => ['required', 'exists:companies,id'],
+            'plant_id' => ['required', 'exists:plants,id'],
             'department_id' => ['required', 'exists:departments,id'],
             'designation_id' => ['required', 'exists:designations,id'],
             'role' => $roleRules,
@@ -369,6 +378,11 @@ class UserController extends Controller
         ]);
 
         unset($validated['send_credentials_email'], $validated['remove_profile_picture']);
+
+        Plant::assertBelongsToCompany(
+            isset($validated['plant_id']) ? (int) $validated['plant_id'] : null,
+            isset($validated['company_id']) ? (int) $validated['company_id'] : null,
+        );
 
         if (empty($validated['parent_user_id'])) {
             $validated['parent_user_id'] = null;

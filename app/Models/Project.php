@@ -17,6 +17,8 @@ class Project extends Model
     protected $fillable = [
         'name',
         'year',
+        'company_id',
+        'plant_id',
         'project_category_id',
         'department_id',
         'reference_number',
@@ -40,6 +42,16 @@ class Project extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(ProjectCategory::class, 'project_category_id');
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function plant(): BelongsTo
+    {
+        return $this->belongsTo(Plant::class);
     }
 
     public function department(): BelongsTo

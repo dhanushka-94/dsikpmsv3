@@ -37,10 +37,18 @@
                             <dt class="text-xs font-bold uppercase tracking-wider text-muted">EPF Number</dt>
                             <dd class="mt-1 font-semibold">{{ $user->epf_number ?: '—' }}</dd>
                         </div>
-                        <div>
-                            <dt class="text-xs font-bold uppercase tracking-wider text-muted">Department</dt>
-                            <dd class="mt-1 font-semibold">{{ $user->department?->displayName() ?? '—' }}</dd>
-                        </div>
+                    <div>
+                        <dt class="text-xs font-bold uppercase tracking-wider text-muted">Company</dt>
+                        <dd class="mt-1 font-semibold">{{ $user->company?->name ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-bold uppercase tracking-wider text-muted">Plant</dt>
+                        <dd class="mt-1 font-semibold">{{ $user->plant?->name ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-bold uppercase tracking-wider text-muted">Department</dt>
+                        <dd class="mt-1 font-semibold">{{ $user->department?->displayName() ?? '—' }}</dd>
+                    </div>
                         <div>
                             <dt class="text-xs font-bold uppercase tracking-wider text-muted">Designation</dt>
                             <dd class="mt-1 font-semibold">{{ $user->designation?->name ?? '—' }}</dd>

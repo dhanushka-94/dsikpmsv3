@@ -26,16 +26,22 @@
                 <option value="{{ $value }}" @selected(request('status') === $value)>{{ $label }}</option>
             @endforeach
         </select>
-        <select name="project_category_id" class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm">
-            <option value="">All categories</option>
-            @foreach($categories as $category)
-                <option value="{{ $category->id }}" @selected((string) request('project_category_id') === (string) $category->id)>{{ $category->name }}</option>
+        <select name="company_id" class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm">
+            <option value="">All companies</option>
+            @foreach($companies as $company)
+                <option value="{{ $company->id }}" @selected((string) request('company_id') === (string) $company->id)>{{ $company->name }}</option>
             @endforeach
         </select>
         <select name="department_id" class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm">
             <option value="">All departments</option>
             @foreach($departments as $department)
                 <option value="{{ $department->id }}" @selected((string) request('department_id') === (string) $department->id)>{{ $department->displayName() }}</option>
+            @endforeach
+        </select>
+        <select name="project_category_id" class="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm">
+            <option value="">All categories</option>
+            @foreach($categories as $category)
+                <option value="{{ $category->id }}" @selected((string) request('project_category_id') === (string) $category->id)>{{ $category->name }}</option>
             @endforeach
         </select>
         <div class="flex gap-2 lg:col-span-6">
@@ -53,6 +59,12 @@
                             <a href="{{ route('projects.show', $project) }}" class="text-lg font-extrabold tracking-tight hover:text-brand-700">{{ $project->name }}</a>
                             <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ $project->status->badgeClasses() }}">{{ $project->status->label() }}</span>
                             <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">{{ $project->year }}</span>
+                            @if($project->company)
+                                <span class="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-slate-200">{{ $project->company->name }}</span>
+                            @endif
+                            @if($project->plant)
+                                <span class="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-slate-200">{{ $project->plant->name }}</span>
+                            @endif
                         </div>
                         <div class="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
                             <div>

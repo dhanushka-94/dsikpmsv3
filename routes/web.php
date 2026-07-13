@@ -6,6 +6,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\PlantController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectCategoryController;
 use App\Http\Controllers\ProjectController;
@@ -45,6 +47,8 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
         Route::middleware('role:super_admin,admin')->group(function () {
             Route::resource('departments', DepartmentController::class)->except(['show']);
             Route::resource('designations', DesignationController::class)->except(['show']);
+            Route::resource('companies', CompanyController::class)->except(['show']);
+            Route::resource('plants', PlantController::class)->except(['show']);
             Route::resource('users', UserController::class);
             Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])
                 ->name('users.reset-password');
