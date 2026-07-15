@@ -1,7 +1,15 @@
 {
-    "version": "2.0.2",
-    "released_at": "2026-07-14",
+    "version": "2.0.3",
+    "released_at": "2026-07-15",
     "releases": [
+        {
+            "version": "2.0.3",
+            "date": "2026-07-15",
+            "title": "Route fix",
+            "changes": [
+                "Fix Create KPI 404 by registering kpis/create before kpis/{kpi}."
+            ]
+        },
         {
             "version": "2.0.2",
             "date": "2026-07-14",

@@ -47,9 +47,8 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
         Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
 
         // Assigned users can view / feed their KPIs; create/edit/delete stay admin-only below.
+        // Register index first; keep kpis/{kpi} AFTER create so "create" is not captured as an id.
         Route::get('kpis', [KpiController::class, 'index'])->name('kpis.index');
-        Route::get('kpis/{kpi}', [KpiController::class, 'show'])->name('kpis.show');
-        Route::post('kpis/{kpi}/calculate', [KpiController::class, 'calculate'])->name('kpis.calculate');
 
         Route::middleware('role:super_admin,admin')->group(function () {
             Route::resource('departments', DepartmentController::class)->except(['show']);
@@ -78,6 +77,9 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
             Route::get('activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
             Route::get('users/{user}/activity', [ActivityLogController::class, 'forUser'])->name('activity-logs.user');
         });
+
+        Route::get('kpis/{kpi}', [KpiController::class, 'show'])->name('kpis.show');
+        Route::post('kpis/{kpi}/calculate', [KpiController::class, 'calculate'])->name('kpis.calculate');
 
         Route::middleware('role:super_admin')->group(function () {
             Route::get('changelog', ChangelogController::class)->name('changelog.index');
