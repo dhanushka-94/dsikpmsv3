@@ -1,7 +1,15 @@
 {
-    "version": "2.0.4",
+    "version": "2.0.5",
     "released_at": "2026-07-19",
     "releases": [
+        {
+            "version": "2.0.5",
+            "date": "2026-07-19",
+            "title": "Short value names",
+            "changes": [
+                "Show abbreviated formula value names in KPI results history Values column."
+            ]
+        },
         {
             "version": "2.0.4",
             "date": "2026-07-19",

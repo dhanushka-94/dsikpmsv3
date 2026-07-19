@@ -291,8 +291,8 @@
                                     <td class="px-3 py-3">
                                         <div class="flex flex-wrap gap-1.5">
                                             @foreach(($entry->values ?? []) as $valueName => $value)
-                                                <span class="max-w-full break-words rounded-2xl bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 [overflow-wrap:anywhere]" title="{{ $valueName }}: {{ $value }}">
-                                                    {{ $valueName }}: {{ $value }}
+                                                <span class="max-w-full rounded-2xl bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700" title="{{ $valueName }}: {{ $value }}">
+                                                    {{ short_formula_name((string) $valueName) }}: {{ $value }}
                                                 </span>
                                             @endforeach
                                         </div>

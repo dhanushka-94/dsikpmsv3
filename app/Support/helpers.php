@@ -80,3 +80,36 @@ if (! function_exists('dsi_parse_datetime')) {
         }
     }
 }
+
+if (! function_exists('short_formula_name')) {
+    /**
+     * Compact label for long formula value names (history chips, tables).
+     * Multi-word names become initials; long single words are truncated.
+     */
+    function short_formula_name(string $name, int $max = 14): string
+    {
+        $name = trim($name);
+
+        if ($name === '') {
+            return '—';
+        }
+
+        if (mb_strlen($name) <= $max) {
+            return $name;
+        }
+
+        $words = preg_split('/[\s_\-]+/u', $name, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        if (count($words) >= 2) {
+            $initials = collect($words)
+                ->map(fn (string $word) => mb_strtoupper(mb_substr($word, 0, 1)))
+                ->implode('');
+
+            if ($initials !== '' && mb_strlen($initials) <= $max) {
+                return $initials;
+            }
+        }
+
+        return mb_substr($name, 0, max(1, $max - 1)).'…';
+    }
+}
