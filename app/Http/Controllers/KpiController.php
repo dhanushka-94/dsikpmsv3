@@ -226,7 +226,60 @@ class KpiController extends Controller
             'dateFrom' => $dateFrom?->format('Y-m-d'),
             'dateTo' => $dateTo?->format('Y-m-d'),
             'hasDateFilter' => $dateFrom !== null || $dateTo !== null,
+            'financialYears' => $this->financialYearOptions($kpi, $dateFrom, $dateTo),
         ]);
+    }
+
+    /**
+     * Financial years for Sri Lanka style period: 1 Apr → 31 Mar.
+     *
+     * @return list<array{label: string, from: string, to: string, active: bool}>
+     */
+    private function financialYearOptions(
+        Kpi $kpi,
+        ?\Carbon\CarbonInterface $dateFrom = null,
+        ?\Carbon\CarbonInterface $dateTo = null,
+    ): array {
+        $periodStart = $kpi->start_date->copy()->startOfDay();
+        $periodEnd = $kpi->end_date->copy()->startOfDay();
+
+        if ($periodEnd->lt($periodStart)) {
+            return [];
+        }
+
+        $fyStartYear = $periodStart->month >= 4 ? $periodStart->year : $periodStart->year - 1;
+        $fyEndYear = $periodEnd->month >= 4 ? $periodEnd->year : $periodEnd->year - 1;
+
+        $options = [];
+
+        for ($year = $fyStartYear; $year <= $fyEndYear; $year++) {
+            $fyFrom = \Illuminate\Support\Carbon::create($year, 4, 1)->startOfDay();
+            $fyTo = \Illuminate\Support\Carbon::create($year + 1, 3, 31)->startOfDay();
+
+            // Keep quick picks inside the KPI period.
+            $from = $fyFrom->copy()->max($periodStart);
+            $to = $fyTo->copy()->min($periodEnd);
+
+            if ($to->lt($from)) {
+                continue;
+            }
+
+            $fromStr = $from->format('Y-m-d');
+            $toStr = $to->format('Y-m-d');
+            $label = 'FY '.$year.'/'.substr((string) ($year + 1), -2);
+
+            $active = $dateFrom?->format('Y-m-d') === $fromStr
+                && $dateTo?->format('Y-m-d') === $toStr;
+
+            $options[] = [
+                'label' => $label,
+                'from' => $fromStr,
+                'to' => $toStr,
+                'active' => $active,
+            ];
+        }
+
+        return $options;
     }
 
     /**

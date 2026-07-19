@@ -1,7 +1,15 @@
 {
-    "version": "2.0.3",
-    "released_at": "2026-07-15",
+    "version": "2.0.4",
+    "released_at": "2026-07-19",
     "releases": [
+        {
+            "version": "2.0.4",
+            "date": "2026-07-19",
+            "title": "Financial year filter",
+            "changes": [
+                "Add quick Financial Year selectors (1 Apr to 31 Mar) on KPI detail date range."
+            ]
+        },
         {
             "version": "2.0.3",
             "date": "2026-07-15",
