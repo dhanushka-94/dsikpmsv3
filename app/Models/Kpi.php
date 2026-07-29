@@ -18,6 +18,8 @@ class Kpi extends Model
         'name',
         'kpi_index',
         'kpi_category_id',
+        'company_id',
+        'plant_id',
         'definition',
         'formula',
         'formula_fields',
@@ -48,6 +50,16 @@ class Kpi extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(KpiCategory::class, 'kpi_category_id');
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function plant(): BelongsTo
+    {
+        return $this->belongsTo(Plant::class);
     }
 
     public function creator(): BelongsTo

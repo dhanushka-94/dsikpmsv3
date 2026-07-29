@@ -1,7 +1,15 @@
 {
-    "version": "2.0.5",
-    "released_at": "2026-07-19",
+    "version": "2.0.6",
+    "released_at": "2026-07-30",
     "releases": [
+        {
+            "version": "2.0.6",
+            "date": "2026-07-30",
+            "title": "KPI company and plant",
+            "changes": [
+                "Add required company and plant selection when creating or editing KPIs, with list filters and detail display."
+            ]
+        },
         {
             "version": "2.0.5",
             "date": "2026-07-19",

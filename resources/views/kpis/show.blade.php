@@ -23,6 +23,12 @@
     <div class="mb-5 flex flex-wrap items-center gap-2">
         <span class="rounded-full bg-ink px-2.5 py-1 text-xs font-bold text-white">{{ $kpi->kpi_index ?: 'No index' }}</span>
         <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">{{ $kpi->category?->name ?? '—' }}</span>
+        @if($kpi->company)
+            <span class="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-slate-200">{{ $kpi->company->name }}</span>
+        @endif
+        @if($kpi->plant)
+            <span class="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-600 ring-1 ring-slate-200">{{ $kpi->plant->name }}</span>
+        @endif
         <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ $kpi->benchmark_type->badgeClasses() }}">{{ $kpi->benchmark_type->label() }}</span>
         <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ $kpi->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
             {{ $kpi->is_active ? 'Active' : 'Inactive' }}
@@ -346,6 +352,14 @@
                     <div>
                         <dt class="text-xs font-bold uppercase tracking-wider text-muted">Benchmark %</dt>
                         <dd class="mt-1 font-semibold">{{ $kpi->benchmark_percent }}%</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-bold uppercase tracking-wider text-muted">Company</dt>
+                        <dd class="mt-1 font-semibold">{{ $kpi->company?->name ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-bold uppercase tracking-wider text-muted">Plant</dt>
+                        <dd class="mt-1 font-semibold">{{ $kpi->plant?->name ?? '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-bold uppercase tracking-wider text-muted">Period</dt>

@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Enums\BenchmarkType;
 use App\Enums\UserRole;
+use App\Models\Company;
 use App\Models\Kpi;
 use App\Models\KpiCategory;
 use App\Models\KpiResult;
+use App\Models\Plant;
 use App\Models\Project;
 use App\Models\User;
 use App\Services\ActivityLogger;
@@ -29,7 +31,7 @@ class KpiController extends Controller
         $user = $request->user();
 
         $kpis = Kpi::query()
-            ->with(['category'])
+            ->with(['category', 'company', 'plant'])
             ->withCount(['projects', 'users', 'results'])
             ->when(! $user->canManageUsers(), function ($query) use ($user) {
                 $query->whereHas('users', fn ($q) => $q->where('users.id', $user->id));
@@ -45,6 +47,8 @@ class KpiController extends Controller
             })
             ->when($request->filled('kpi_category_id'), fn ($q) => $q->where('kpi_category_id', $request->integer('kpi_category_id')))
             ->when($request->filled('benchmark_type'), fn ($q) => $q->where('benchmark_type', $request->string('benchmark_type')))
+            ->when($request->filled('company_id'), fn ($q) => $q->where('company_id', $request->integer('company_id')))
+            ->when($request->filled('plant_id'), fn ($q) => $q->where('plant_id', $request->integer('plant_id')))
             ->orderBy('kpi_index')
             ->orderBy('name')
             ->paginate(12)
@@ -54,6 +58,8 @@ class KpiController extends Controller
             'kpis' => $kpis,
             'categories' => KpiCategory::ordered()->get(),
             'benchmarkTypes' => BenchmarkType::options(),
+            'companies' => Company::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'plants' => Plant::where('is_active', true)->ordered()->get(['id', 'company_id', 'name']),
             'canManage' => $user->canManageUsers(),
         ]);
     }
@@ -111,6 +117,8 @@ class KpiController extends Controller
 
         $kpi->load([
             'category',
+            'company',
+            'plant',
             'creator',
             'projects.company',
             'projects.plant',
@@ -545,6 +553,8 @@ class KpiController extends Controller
 
         return [
             'categories' => KpiCategory::ordered()->get(),
+            'companies' => Company::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'plants' => Plant::where('is_active', true)->ordered()->get(['id', 'company_id', 'name']),
             'projects' => Project::query()->with(['company', 'plant'])->orderByDesc('year')->orderBy('name')->get(),
             'assignableUsers' => $assignableUsers,
             'benchmarkTypes' => BenchmarkType::options(),
@@ -593,6 +603,8 @@ class KpiController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'kpi_index' => ['required', 'string', 'max:100'],
             'kpi_category_id' => ['required', 'exists:kpi_categories,id'],
+            'company_id' => ['required', 'exists:companies,id'],
+            'plant_id' => ['required', 'exists:plants,id'],
             'definition' => ['nullable', 'string', 'max:5000'],
             'formula' => ['required', 'string', 'max:1000'],
             'formula_fields' => ['required', 'array', 'min:1'],
@@ -603,6 +615,11 @@ class KpiController extends Controller
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'is_active' => ['nullable', 'boolean'],
         ]);
+
+        Plant::assertBelongsToCompany(
+            isset($validated['plant_id']) ? (int) $validated['plant_id'] : null,
+            isset($validated['company_id']) ? (int) $validated['company_id'] : null,
+        );
 
         $fields = collect($validated['formula_fields'])
             ->map(fn ($row) => ['name' => trim((string) $row['name'])])

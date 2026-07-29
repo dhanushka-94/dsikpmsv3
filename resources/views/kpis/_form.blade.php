@@ -33,6 +33,13 @@
                 <p class="mt-1 text-xs text-muted"><a href="{{ route('kpi-categories.create') }}" class="font-semibold text-brand-700 hover:underline" target="_blank">Add KPI category</a></p>
             </div>
 
+            @include('partials.company-plant-fields', [
+                'companies' => $companies,
+                'plants' => $plants,
+                'selectedCompanyId' => old('company_id', $kpi?->company_id),
+                'selectedPlantId' => old('plant_id', $kpi?->plant_id),
+            ])
+
             <div>
                 <label class="mb-1.5 block text-sm font-semibold">Benchmark type <span class="text-brand-600">*</span></label>
                 <select name="benchmark_type" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
