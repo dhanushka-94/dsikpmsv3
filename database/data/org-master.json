@@ -1,0 +1,786 @@
+{
+  "plants": [
+    {
+      "code": "BP",
+      "name": "DSI - Bataduwa Plant"
+    },
+    {
+      "code": "CP",
+      "name": "DSI - Centrelized Operation"
+    },
+    {
+      "code": "MP",
+      "name": "DSI - Main Plant"
+    },
+    {
+      "code": "KP",
+      "name": "DSI - Karandeniya Plant"
+    },
+    {
+      "code": "SP",
+      "name": "DSI - Sportswear Plant"
+    }
+  ],
+  "departments": [
+    {
+      "code": "002004",
+      "name": "DSI-BP-Raw Material Stores"
+    },
+    {
+      "code": "001400",
+      "name": "DSI-BP-Maintenance and Engineering"
+    },
+    {
+      "code": "003753",
+      "name": "DSI-BP-HR & Administration"
+    },
+    {
+      "code": "003161",
+      "name": "DSI-BP-Maintenance & Compliance"
+    },
+    {
+      "code": "002459",
+      "name": "DSI-BP-Production"
+    },
+    {
+      "code": "003491",
+      "name": "DSI-BP-Pre Production Unit"
+    },
+    {
+      "code": "003093",
+      "name": "DSI-BP-Planning"
+    },
+    {
+      "code": "004797",
+      "name": "DSI-BP-Admin"
+    },
+    {
+      "code": "003091",
+      "name": "DSI-BP-Cutting"
+    },
+    {
+      "code": "003750",
+      "name": "DSI-BP-Finance"
+    },
+    {
+      "code": "003745",
+      "name": "DSI-BP-Design"
+    },
+    {
+      "code": "002668",
+      "name": "DSI-BP-Industrial Engineering"
+    },
+    {
+      "code": "003781",
+      "name": "DSI-BP-Quality Assurance"
+    },
+    {
+      "code": "003145",
+      "name": "DSI-BP-Sample Room"
+    },
+    {
+      "code": "003811",
+      "name": "DSI-CO-Administration"
+    },
+    {
+      "code": "000035",
+      "name": "DSI-CO-Finance"
+    },
+    {
+      "code": "003834",
+      "name": "DSI-CO-Design"
+    },
+    {
+      "code": "002787",
+      "name": "DSI-CO-External Production"
+    },
+    {
+      "code": "003831",
+      "name": "DSI-CO-Costing"
+    },
+    {
+      "code": "001776",
+      "name": "DSI-CO-International Marketing"
+    },
+    {
+      "code": "001755",
+      "name": "DSI-CO-Information Technology"
+    },
+    {
+      "code": "003845",
+      "name": "DSI-CO-Industrial Engineering"
+    },
+    {
+      "code": "003877",
+      "name": "DSI-CO-Raw Material Stores"
+    },
+    {
+      "code": "003839",
+      "name": "DSI-CO-Finish Good Stores"
+    },
+    {
+      "code": "000042",
+      "name": "DSI-CO-Maintenance Engeneering"
+    },
+    {
+      "code": "003842",
+      "name": "DSI-CO-Human Resources"
+    },
+    {
+      "code": "003849",
+      "name": "DSI-CO-Internal Audit"
+    },
+    {
+      "code": "003862",
+      "name": "DSI-CO-Procurement"
+    },
+    {
+      "code": "001773",
+      "name": "DSI-CO-Research & Development"
+    },
+    {
+      "code": "000039",
+      "name": "DSI-CO-Sales & Marketing"
+    },
+    {
+      "code": "001760",
+      "name": "DSI-CO-Product Category Management"
+    },
+    {
+      "code": "003874",
+      "name": "DSI-CO-Quality Assurance"
+    },
+    {
+      "code": "003869",
+      "name": "DSI-CO-Product Development Department"
+    },
+    {
+      "code": "001752",
+      "name": "DSI-CO-Planning"
+    },
+    {
+      "code": "003882",
+      "name": "DSI-CO-Security"
+    },
+    {
+      "code": "003500",
+      "name": "DSI-CO-Compliance"
+    },
+    {
+      "code": "003852",
+      "name": "DSI-CO-Laboratory"
+    },
+    {
+      "code": "001886",
+      "name": "DSI-CO-Marchandise"
+    },
+    {
+      "code": "003823",
+      "name": "DSI-CO-Brand Management - Waves"
+    },
+    {
+      "code": "003826",
+      "name": "DSI-CO-Colombo Design Centre"
+    },
+    {
+      "code": "003820",
+      "name": "DSI-CO-Brand Management - Rainbow"
+    },
+    {
+      "code": "004938",
+      "name": "DSI-CO-Supply Chain (International Operations)"
+    },
+    {
+      "code": "003814",
+      "name": "DSI-CO-Brand Management - Ansel"
+    },
+    {
+      "code": "000343",
+      "name": "DSI-CO-Transport"
+    },
+    {
+      "code": "003817",
+      "name": "DSI-CO-Brand Management - Beta"
+    },
+    {
+      "code": "004951",
+      "name": "DSI-CO-Sole"
+    },
+    {
+      "code": "003888",
+      "name": "DSI-CO-Welfare"
+    },
+    {
+      "code": "000041",
+      "name": "DSI-MP-Production"
+    },
+    {
+      "code": "004772",
+      "name": "DSI-MP-Quality Assurance"
+    },
+    {
+      "code": "004067",
+      "name": "DSI-MP-Human Resource"
+    },
+    {
+      "code": "003715",
+      "name": "DSI-MP-Industrial Engineering"
+    },
+    {
+      "code": "000038",
+      "name": "DSI-MP-Maintenance"
+    },
+    {
+      "code": "004766",
+      "name": "DSI-MP-Product Engineering Unit (P E U)"
+    },
+    {
+      "code": "003434",
+      "name": "DSI-MP-Production Control Unit"
+    },
+    {
+      "code": "002750",
+      "name": "DSI-MP-Finance"
+    },
+    {
+      "code": "002747",
+      "name": "DSI-MP-Planning"
+    },
+    {
+      "code": "002453",
+      "name": "DSI-KP-Production"
+    },
+    {
+      "code": "002456",
+      "name": "DSI-KP-Administration"
+    },
+    {
+      "code": "001742",
+      "name": "DSI-KP-Planning"
+    },
+    {
+      "code": "001479",
+      "name": "DSI-KP-Human Resources & Administration"
+    },
+    {
+      "code": "001394",
+      "name": "DSI-KP-Maintenance Engineering"
+    },
+    {
+      "code": "003344",
+      "name": "DSI-KP-Finance"
+    },
+    {
+      "code": "001392",
+      "name": "DSI-KP-Production / Manufacturing"
+    },
+    {
+      "code": "001668",
+      "name": "DSI-KP-Workstudy"
+    },
+    {
+      "code": "000128",
+      "name": "DSI-KP-RM Warehouse"
+    },
+    {
+      "code": "003935",
+      "name": "DSI-KP-Quality"
+    },
+    {
+      "code": "003333",
+      "name": "DSI-SP-Maintenance"
+    },
+    {
+      "code": "003334",
+      "name": "DSI-SP-Production"
+    },
+    {
+      "code": "003335",
+      "name": "DSI-SP-Raw Material Stores"
+    },
+    {
+      "code": "004120",
+      "name": "DSI-SP-Design"
+    },
+    {
+      "code": "004123",
+      "name": "DSI-SP-Finance"
+    },
+    {
+      "code": "003336",
+      "name": "DSI-SP-Finish Good Stores"
+    },
+    {
+      "code": "003339",
+      "name": "DSI-SP-Quality Assurance"
+    },
+    {
+      "code": "003338",
+      "name": "DSI-SP-HR & Administration"
+    },
+    {
+      "code": "003343",
+      "name": "DSI-SP-Industrial Engineering"
+    },
+    {
+      "code": "003738",
+      "name": "DSI-SP-Information Technology"
+    },
+    {
+      "code": "003342",
+      "name": "DSI-SP-Planning"
+    }
+  ],
+  "designations": [
+    {
+      "name": "Senior Officer - Raw Materials"
+    },
+    {
+      "name": "Senior Officer - Maintenance"
+    },
+    {
+      "name": "Executive - Human Resources & Administration"
+    },
+    {
+      "name": "Officer - Compliance"
+    },
+    {
+      "name": "Assistant  Production"
+    },
+    {
+      "name": "Co-ordinator - Production"
+    },
+    {
+      "name": "Officer - Enterprise Resources Planning"
+    },
+    {
+      "name": "Factory Manager"
+    },
+    {
+      "name": "Senior Officer - Finance"
+    },
+    {
+      "name": "Officer - Product Engineering Unit"
+    },
+    {
+      "name": "Senior Officer - Industrial Engineering"
+    },
+    {
+      "name": "Executive - Production"
+    },
+    {
+      "name": "Officer - Industrial Engineering"
+    },
+    {
+      "name": "Assistant - Bag & Work wear"
+    },
+    {
+      "name": "Assistant - Quality Assurance"
+    },
+    {
+      "name": "In-charge - Apparel Cutting"
+    },
+    {
+      "name": "Assistant - Product Engineering Unit"
+    },
+    {
+      "name": "In Charge - Sample Room"
+    },
+    {
+      "name": "Assistant - Industrial Engineering"
+    },
+    {
+      "name": "Senior Officer - Human Resources"
+    },
+    {
+      "name": "Officer - Planning"
+    },
+    {
+      "name": "Officer - Human Resources & Administration"
+    },
+    {
+      "name": "Management Trainee"
+    },
+    {
+      "name": "Senior Officer - Quality Assurance"
+    },
+    {
+      "name": "Managing Director"
+    },
+    {
+      "name": "Executive Director"
+    },
+    {
+      "name": "Chief Financial Officer"
+    },
+    {
+      "name": "Senior Officer - Design"
+    },
+    {
+      "name": "Senior Officer - Procurement"
+    },
+    {
+      "name": "Cluster Manager - Business Development Process"
+    },
+    {
+      "name": "Senior Officer - Costing"
+    },
+    {
+      "name": "Officer - International Marketing"
+    },
+    {
+      "name": "Executive - Information Technology"
+    },
+    {
+      "name": "Executive - Industrial Engineering"
+    },
+    {
+      "name": "Officer - Raw Materials"
+    },
+    {
+      "name": "Cluster Manager - Planning & Plant Operations"
+    },
+    {
+      "name": "Officer - Finish Good Stores"
+    },
+    {
+      "name": "Manager - Design"
+    },
+    {
+      "name": "Senior Officer - Sales & Marketing"
+    },
+    {
+      "name": "Assistant Manager - Sub Contract"
+    },
+    {
+      "name": "Executive - Maintenance Engineering"
+    },
+    {
+      "name": "Manager - Human Resources"
+    },
+    {
+      "name": "Senior Officer - Maintenance Engineering"
+    },
+    {
+      "name": "Executive - Internal Audit"
+    },
+    {
+      "name": "Coordinator - Production"
+    },
+    {
+      "name": "Executive - Procurement"
+    },
+    {
+      "name": "Officer - Research & Development"
+    },
+    {
+      "name": "Officer - Procurement"
+    },
+    {
+      "name": "Officer - Costing"
+    },
+    {
+      "name": "Assistant Manager-Sales & Marketing"
+    },
+    {
+      "name": "Accountant"
+    },
+    {
+      "name": "Executive - Finance"
+    },
+    {
+      "name": "Senior Coordinator - Production"
+    },
+    {
+      "name": "Assistang Manager - Business Development"
+    },
+    {
+      "name": "JUNIOR EXECUTIVE - COSTING"
+    },
+    {
+      "name": "Senior Officer - Finish Good Stores"
+    },
+    {
+      "name": "Executive - Costing"
+    },
+    {
+      "name": "Junior Executive - Raw materials"
+    },
+    {
+      "name": "Senior Executive - Quality Assurance"
+    },
+    {
+      "name": "Executive - International Marketing"
+    },
+    {
+      "name": "Assistant - Finish Good Stores"
+    },
+    {
+      "name": "Officer - Design"
+    },
+    {
+      "name": "Assistant - Procurement"
+    },
+    {
+      "name": "Assistant Manager - Planning"
+    },
+    {
+      "name": "Junior Executive - Human Resources & Administration"
+    },
+    {
+      "name": "Senior Officer - Security"
+    },
+    {
+      "name": "Junior Executive - Finance"
+    },
+    {
+      "name": "Chief Operating Officer"
+    },
+    {
+      "name": "Senior Executive - Project Evaluation & Compliance Audit"
+    },
+    {
+      "name": "Senior Officer - Laboratory"
+    },
+    {
+      "name": "Junior Executive - Information Technology"
+    },
+    {
+      "name": "Senior Officer - International Marketing"
+    },
+    {
+      "name": "Executive - Merchandising"
+    },
+    {
+      "name": "Senior Executive - Merchandising"
+    },
+    {
+      "name": "Senior Manager - Quality Assurance & Laboratory"
+    },
+    {
+      "name": "Senior Manager - Brands"
+    },
+    {
+      "name": "Receptionist"
+    },
+    {
+      "name": "Officer - Information Technology"
+    },
+    {
+      "name": "Senior Officer - Planning"
+    },
+    {
+      "name": "Assistant - Product Development"
+    },
+    {
+      "name": "JUNIOR EXECUTIVE - INTERNATIONAL MARKETING"
+    },
+    {
+      "name": "Junior Executive - Procurement"
+    },
+    {
+      "name": "Assistant - Raw Materials"
+    },
+    {
+      "name": "Executive - Brand Coordinator (Waves)"
+    },
+    {
+      "name": "Assistant - Sales & Marketing"
+    },
+    {
+      "name": "Officer - Supply Chain (International Operations)"
+    },
+    {
+      "name": "JUNIOR EXECUTIVE - DESIGN"
+    },
+    {
+      "name": "Assistant - Laboratory"
+    },
+    {
+      "name": "Officer - Laboratory"
+    },
+    {
+      "name": "Officer - Sub Contract"
+    },
+    {
+      "name": "Executive - Sales & Marketing"
+    },
+    {
+      "name": "Assistant - ERP system support"
+    },
+    {
+      "name": "JUNIOR EXECUTIVE - TRANSPORT"
+    },
+    {
+      "name": "Assistant - Transport"
+    },
+    {
+      "name": "Officer - Finance"
+    },
+    {
+      "name": "JUNIOR EXECUTIVE - PRODUCT CATEGORY MANAGEMENT"
+    },
+    {
+      "name": "Assistant - Design"
+    },
+    {
+      "name": "Executive - Design"
+    },
+    {
+      "name": "Manager - Commercial"
+    },
+    {
+      "name": "Senior Supervisor - Waves"
+    },
+    {
+      "name": "Brand Coordinator"
+    },
+    {
+      "name": "Officer - Product Category Management"
+    },
+    {
+      "name": "Officer - Sales & Marketing"
+    },
+    {
+      "name": "Senior Executive - Human Resource Development"
+    },
+    {
+      "name": "Executive - Research & Development"
+    },
+    {
+      "name": "ASSISTANT - ERP SYSTERM SUPPORT"
+    },
+    {
+      "name": "Executive - Administration"
+    },
+    {
+      "name": "Manager - Procurement & Special Projects"
+    },
+    {
+      "name": "Assistant - Finance"
+    },
+    {
+      "name": "Senior Accountant"
+    },
+    {
+      "name": "Officer - Personal Assistant Cum Research"
+    },
+    {
+      "name": "Manager - International Marketing"
+    },
+    {
+      "name": "Officer - Human Resource Development"
+    },
+    {
+      "name": "Assistant Engineer - Research & Development"
+    },
+    {
+      "name": "Manager - Procurement"
+    },
+    {
+      "name": "Assistant Manager - Procuremet"
+    },
+    {
+      "name": "Executive - Security, Investigations & Surveillance"
+    },
+    {
+      "name": "JUNIOR EXECUTIVE - LAB & QA"
+    },
+    {
+      "name": "Supervisor - Waves Showrooms"
+    },
+    {
+      "name": "Senior Manager - Research & Development"
+    },
+    {
+      "name": "Senior Executive - Procurement"
+    },
+    {
+      "name": "Head of Maintenance"
+    },
+    {
+      "name": "SENIOR EXECUTIVE - PRODUCT CATEGORY MANAGEMENT"
+    },
+    {
+      "name": "Officer - Merchandising"
+    },
+    {
+      "name": "Designer"
+    },
+    {
+      "name": "Officer - Marketing"
+    },
+    {
+      "name": "Officer - Brand Management"
+    },
+    {
+      "name": "Assistant Manager - Brand"
+    },
+    {
+      "name": "Assistant - Administration"
+    },
+    {
+      "name": "Assistant - International Marketing"
+    },
+    {
+      "name": "Officer - Welfare"
+    },
+    {
+      "name": "Senior Executive - Production"
+    },
+    {
+      "name": "Officer - Administration"
+    },
+    {
+      "name": "Officer - Quality Assurance"
+    },
+    {
+      "name": "Executive - Mainteanance Engineering"
+    },
+    {
+      "name": "Assistant - Production"
+    },
+    {
+      "name": "Executive - Product Engineering"
+    },
+    {
+      "name": "Senior Officer - Product Engineering Unit"
+    },
+    {
+      "name": "Executive - Quality Assurance"
+    },
+    {
+      "name": "Junior Executive - Planning"
+    },
+    {
+      "name": "Assistant - Maintenance Engineering"
+    },
+    {
+      "name": "Assistant - Production Engineering Unit"
+    },
+    {
+      "name": "Assistant - Planning"
+    },
+    {
+      "name": "Assistant - Human Resources & Administration"
+    },
+    {
+      "name": "Senior Officer - Production"
+    },
+    {
+      "name": "Officer - Production"
+    },
+    {
+      "name": "Junior Executive - Industrial Engineering"
+    },
+    {
+      "name": "Assistant Factory Manager"
+    },
+    {
+      "name": "Nurse"
+    },
+    {
+      "name": "Assistant - Sub Contract"
+    }
+  ]
+}

@@ -4,9 +4,9 @@
     <h2 class="text-base font-bold">Basic information</h2>
     <div class="mt-4 grid gap-4 md:grid-cols-2">
         <div>
-            <label class="mb-1.5 block text-sm font-semibold">Title <span class="text-brand-600">*</span></label>
-            <select name="title" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
-                <option value="">Select title</option>
+            <label class="mb-1.5 block text-sm font-semibold">Title</label>
+            <select name="title" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
+                <option value="">No title</option>
                 @foreach($titles as $value => $label)
                     <option value="{{ $value }}" @selected(old('title', $user?->title?->value) === $value)>{{ $label }}</option>
                 @endforeach
@@ -14,8 +14,23 @@
         </div>
 
         <div>
+            <label class="mb-1.5 block text-sm font-semibold">Calling name <span class="text-brand-600">*</span></label>
+            <input type="text" name="calling_name" value="{{ old('calling_name', $user?->calling_name) }}" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
+        </div>
+
+        <div>
+            <label class="mb-1.5 block text-sm font-semibold">Middle initials</label>
+            <input type="text" name="middle_initials" value="{{ old('middle_initials', $user?->middle_initials) }}" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
+        </div>
+
+        <div>
             <label class="mb-1.5 block text-sm font-semibold">Name <span class="text-brand-600">*</span></label>
-            <input type="text" name="name" value="{{ old('name', $user?->name) }}" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
+            <input type="text" name="last_name" value="{{ old('last_name', $user?->last_name) }}" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
+        </div>
+
+        <div>
+            <label class="mb-1.5 block text-sm font-semibold">Joined date</label>
+            <input type="date" name="joined_date" value="{{ old('joined_date', optional($user?->joined_date)->format('Y-m-d')) }}" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
         </div>
 
         <div>
@@ -88,7 +103,7 @@
             <input type="file" name="profile_picture" accept="image/*" class="w-full rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm">
             @if($user?->profilePictureUrl())
                 <div class="mt-3 flex items-center gap-3">
-                    <img src="{{ $user->profilePictureUrl() }}" class="h-14 w-14 rounded-2xl object-cover" alt="">
+                    <x-profile-photo :url="$user->profilePictureUrl()" class="h-14 w-14" rounded="rounded-2xl" ring="" :alt="$user->displayName()" />
                     <label class="flex items-center gap-2 text-sm text-muted">
                         <input type="checkbox" name="remove_profile_picture" value="1">
                         Remove current picture

@@ -21,3 +21,7 @@
     --color-ink: #1c2434;
     --color-muted: #667085;
 }
+
+[x-cloak] {
+    display: none !important;
+}

@@ -282,10 +282,10 @@
             <h2 class="text-base font-bold">Your profile</h2>
             <div class="mt-5 flex flex-col gap-5 sm:flex-row sm:items-center">
                 @if($user->profilePictureUrl())
-                    <img src="{{ $user->profilePictureUrl() }}" alt="" class="h-24 w-24 rounded-3xl object-cover ring-4 ring-brand-50">
+                    <x-profile-photo :url="$user->profilePictureUrl()" class="h-24 w-24" rounded="rounded-3xl" ring="ring-4 ring-brand-50" :alt="$user->displayName()" />
                 @else
                     <div class="flex h-24 w-24 items-center justify-center rounded-3xl bg-brand-50 text-3xl font-extrabold text-brand-600">
-                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                        {{ strtoupper(substr($user->calling_name ?: $user->name, 0, 1)) }}
                     </div>
                 @endif
                 <dl class="grid flex-1 gap-3 sm:grid-cols-2">

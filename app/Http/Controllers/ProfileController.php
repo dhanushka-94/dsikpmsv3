@@ -52,7 +52,6 @@ class ProfileController extends Controller
             'parent_user_id' => ['nullable', 'exists:users,id', Rule::notIn([$user->id])],
             'profile_picture' => ['nullable', 'image', 'max:2048'],
             'remove_profile_picture' => ['nullable', 'boolean'],
-            'current_password' => ['nullable', 'required_with:password', 'current_password'],
             'password' => ['nullable', 'confirmed', Password::defaults()],
         ]);
 
@@ -84,7 +83,7 @@ class ProfileController extends Controller
             unset($validated['password']);
         }
 
-        unset($validated['current_password'], $validated['remove_profile_picture']);
+        unset($validated['remove_profile_picture']);
 
         $passwordChanged = array_key_exists('password', $validated);
         $before = $this->activityLogger->snapshot($user);

@@ -18,9 +18,13 @@ class User extends Authenticatable
 
     protected $fillable = [
         'title',
+        'calling_name',
+        'middle_initials',
+        'last_name',
         'name',
         'email',
         'epf_number',
+        'joined_date',
         'company_id',
         'plant_id',
         'department_id',
@@ -42,6 +46,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'joined_date' => 'date',
             'password' => 'hashed',
             'is_active' => 'boolean',
             'must_change_password' => 'boolean',
@@ -128,7 +133,24 @@ class User extends Authenticatable
 
     public function displayName(): string
     {
-        return trim(($this->title?->value ? $this->title->value.' ' : '').$this->name);
+        $parts = array_filter([
+            $this->calling_name,
+            $this->middle_initials,
+            $this->last_name,
+        ], fn ($part) => filled($part));
+
+        $fullName = $parts !== [] ? implode(' ', $parts) : $this->name;
+
+        return trim(($this->title?->value ? $this->title->value.' ' : '').$fullName);
+    }
+
+    public static function composeFullName(?string $callingName, ?string $middleInitials, ?string $lastName): string
+    {
+        return trim(implode(' ', array_filter([
+            $callingName,
+            $middleInitials,
+            $lastName,
+        ], fn ($part) => filled($part))));
     }
 
     public function profilePictureUrl(): ?string

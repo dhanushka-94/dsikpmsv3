@@ -18,11 +18,18 @@ class UserFactory extends Factory
 
     public function definition(): array
     {
+        $callingName = fake()->firstName();
+        $lastName = fake()->lastName();
+
         return [
             'title' => fake()->randomElement(UserTitle::cases())->value,
-            'name' => fake()->name(),
+            'calling_name' => $callingName,
+            'middle_initials' => fake()->optional()->lexify('? ?'),
+            'last_name' => $lastName,
+            'name' => User::composeFullName($callingName, null, $lastName),
             'email' => fake()->unique()->safeEmail(),
             'epf_number' => fake()->optional()->unique()->numerify('EPF####'),
+            'joined_date' => fake()->optional()->date(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'role' => UserRole::User,

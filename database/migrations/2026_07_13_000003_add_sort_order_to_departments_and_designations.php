@@ -9,13 +9,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('departments', function (Blueprint $table) {
-            $table->unsignedInteger('sort_order')->default(0)->after('is_active');
-        });
+        if (! Schema::hasColumn('departments', 'sort_order')) {
+            Schema::table('departments', function (Blueprint $table) {
+                $table->unsignedInteger('sort_order')->default(0)->after('is_active');
+            });
+        }
 
-        Schema::table('designations', function (Blueprint $table) {
-            $table->unsignedInteger('sort_order')->default(0)->after('is_active');
-        });
+        if (! Schema::hasColumn('designations', 'sort_order')) {
+            Schema::table('designations', function (Blueprint $table) {
+                $table->unsignedInteger('sort_order')->default(0)->after('is_active');
+            });
+        }
 
         $departmentId = 1;
         foreach (DB::table('departments')->orderBy('name')->pluck('id') as $id) {
@@ -30,12 +34,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('departments', function (Blueprint $table) {
-            $table->dropColumn('sort_order');
-        });
-
-        Schema::table('designations', function (Blueprint $table) {
-            $table->dropColumn('sort_order');
-        });
+        // Intentionally empty: sort_order lives on the base create migration for fresh installs.
     }
 };

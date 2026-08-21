@@ -58,6 +58,10 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
             Route::resource('users', UserController::class);
             Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])
                 ->name('users.reset-password');
+            Route::post('users/{user}/set-password', [UserController::class, 'setPassword'])
+                ->name('users.set-password');
+            Route::post('users-reset-all-passwords', [UserController::class, 'resetAllPasswords'])
+                ->name('users.reset-all-passwords');
 
             Route::get('/users-tree', UserTreeController::class)->name('users.tree');
             Route::get('/users-tree/{user}/projects', [UserTreeController::class, 'projects'])->name('users.tree.projects');

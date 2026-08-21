@@ -20,6 +20,7 @@ class UserTreeController extends Controller
     {
         $departmentId = $request->integer('department_id') ?: null;
         $designationId = $request->integer('designation_id') ?: null;
+        $search = trim((string) $request->string('search'));
 
         $users = User::query()
             ->with(['department.parent', 'designation', 'parent'])
@@ -36,6 +37,10 @@ class UserTreeController extends Controller
             ->when($designationId, fn ($q) => $q->where('designation_id', $designationId))
             ->get();
 
+        if ($search !== '') {
+            $users = $this->filterUsersBySearch($users, $search);
+        }
+
         $visibleIds = $users->pluck('id')->map(fn ($id) => (int) $id)->all();
         $roots = $this->buildTree($users, $visibleIds);
 
@@ -48,6 +53,7 @@ class UserTreeController extends Controller
                 'filters' => [
                     'department_id' => $departmentId,
                     'designation_id' => $designationId,
+                    'search' => $search !== '' ? $search : null,
                 ],
             ],
         );
@@ -60,6 +66,7 @@ class UserTreeController extends Controller
             'filters' => [
                 'department_id' => $departmentId,
                 'designation_id' => $designationId,
+                'search' => $search,
             ],
         ]);
     }
@@ -153,6 +160,55 @@ class UserTreeController extends Controller
     private function authorizeTreeUser(User $user): void
     {
         abort_if($user->isSuperAdmin(), 404);
+    }
+
+    /**
+     * Keep matching users plus their visible ancestors so the hierarchy still makes sense.
+     *
+     * @param  Collection<int, User>  $users
+     * @return Collection<int, User>
+     */
+    private function filterUsersBySearch(Collection $users, string $search): Collection
+    {
+        $needle = mb_strtolower($search);
+
+        $matches = $users->filter(function (User $user) use ($needle) {
+            $haystack = mb_strtolower(implode(' ', array_filter([
+                $user->displayName(),
+                $user->name,
+                $user->calling_name,
+                $user->middle_initials,
+                $user->last_name,
+                $user->email,
+                $user->epf_number,
+                $user->designation?->name,
+                $user->department?->name,
+            ])));
+
+            return str_contains($haystack, $needle);
+        });
+
+        if ($matches->isEmpty()) {
+            return collect();
+        }
+
+        $byId = $users->keyBy(fn (User $user) => (int) $user->id);
+        $keepIds = [];
+
+        foreach ($matches as $match) {
+            $current = $match;
+            while ($current) {
+                $id = (int) $current->id;
+                if (isset($keepIds[$id])) {
+                    break;
+                }
+                $keepIds[$id] = true;
+                $parentId = $current->parent_user_id ? (int) $current->parent_user_id : null;
+                $current = $parentId && $byId->has($parentId) ? $byId->get($parentId) : null;
+            }
+        }
+
+        return $users->filter(fn (User $user) => isset($keepIds[(int) $user->id]))->values();
     }
 
     /**

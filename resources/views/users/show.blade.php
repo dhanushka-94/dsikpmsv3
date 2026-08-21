@@ -22,16 +22,32 @@
             <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
                 <div class="flex flex-col gap-5 sm:flex-row sm:items-start">
                     @if($user->profilePictureUrl())
-                        <img src="{{ $user->profilePictureUrl() }}" class="h-28 w-28 rounded-3xl object-cover ring-4 ring-brand-50" alt="">
+                        <x-profile-photo :url="$user->profilePictureUrl()" class="h-28 w-28" rounded="rounded-3xl" ring="ring-4 ring-brand-50" :alt="$user->displayName()" />
                     @else
                         <div class="flex h-28 w-28 items-center justify-center rounded-3xl bg-brand-50 text-4xl font-extrabold text-brand-600">
-                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                            {{ strtoupper(substr($user->calling_name ?: $user->name, 0, 1)) }}
                         </div>
                     @endif
                     <dl class="grid flex-1 gap-4 sm:grid-cols-2">
                         <div>
                             <dt class="text-xs font-bold uppercase tracking-wider text-muted">Title</dt>
                             <dd class="mt-1 font-semibold">{{ $user->title?->value ?? '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs font-bold uppercase tracking-wider text-muted">Calling name</dt>
+                            <dd class="mt-1 font-semibold">{{ $user->calling_name ?: '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs font-bold uppercase tracking-wider text-muted">Middle initials</dt>
+                            <dd class="mt-1 font-semibold">{{ $user->middle_initials ?: '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs font-bold uppercase tracking-wider text-muted">Name</dt>
+                            <dd class="mt-1 font-semibold">{{ $user->last_name ?: '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs font-bold uppercase tracking-wider text-muted">Joined date</dt>
+                            <dd class="mt-1 font-semibold">{{ $user->joined_date?->format('d M Y') ?: '—' }}</dd>
                         </div>
                         <div>
                             <dt class="text-xs font-bold uppercase tracking-wider text-muted">EPF Number</dt>
@@ -93,18 +109,50 @@
 
                 @if($canManage)
                     @if(auth()->user()->canResetPasswords())
-                        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                            <h3 class="font-bold">Reset password</h3>
-                            <form method="POST" action="{{ route('users.reset-password', $user) }}" class="mt-4 space-y-3">
-                                @csrf
-                                <label class="flex items-center gap-2 text-sm">
-                                    <input type="checkbox" name="send_email" value="1" class="rounded text-brand-600 focus:ring-brand-500">
-                                    Send new password by email
-                                </label>
-                                <button class="w-full rounded-2xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-700">
-                                    Reset & show credentials
-                                </button>
-                            </form>
+                        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-5">
+                            <div>
+                                <h3 class="font-bold">Reset password</h3>
+                                <p class="mt-1 text-xs text-muted">Generate a temporary password. User must change it on next login.</p>
+                                <form method="POST" action="{{ route('users.reset-password', $user) }}" class="mt-4 space-y-3">
+                                    @csrf
+                                    <label class="flex items-center gap-2 text-sm">
+                                        <input type="checkbox" name="send_email" value="1" class="rounded text-brand-600 focus:ring-brand-500">
+                                        Send new password by email
+                                    </label>
+                                    <button class="w-full rounded-2xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-700">
+                                        Auto-generate & show
+                                    </button>
+                                </form>
+                            </div>
+
+                            @if(auth()->user()->isSuperAdmin())
+                                <div class="border-t border-slate-100 pt-5">
+                                    <h3 class="font-bold">Set password</h3>
+                                    <p class="mt-1 text-xs text-muted">Choose a password yourself (Super Admin only).</p>
+                                    <form method="POST" action="{{ route('users.set-password', $user) }}" class="mt-4 space-y-3">
+                                        @csrf
+                                        <div>
+                                            <label class="mb-1.5 block text-sm font-semibold">New password</label>
+                                            <input type="password" name="password" required class="w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
+                                        </div>
+                                        <div>
+                                            <label class="mb-1.5 block text-sm font-semibold">Confirm password</label>
+                                            <input type="password" name="password_confirmation" required class="w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
+                                        </div>
+                                        <label class="flex items-center gap-2 text-sm">
+                                            <input type="checkbox" name="must_change_password" value="1" class="rounded text-brand-600 focus:ring-brand-500" checked>
+                                            Require change on next login
+                                        </label>
+                                        <label class="flex items-center gap-2 text-sm">
+                                            <input type="checkbox" name="send_email" value="1" class="rounded text-brand-600 focus:ring-brand-500">
+                                            Send password by email
+                                        </label>
+                                        <button class="w-full rounded-2xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-bold text-brand-700 hover:bg-brand-100">
+                                            Set password & show
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
                         </div>
                     @endif
 

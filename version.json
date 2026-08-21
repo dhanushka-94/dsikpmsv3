@@ -1,7 +1,20 @@
 {
-    "version": "2.0.6",
-    "released_at": "2026-07-30",
+    "version": "2.0.7",
+    "released_at": "2026-08-22",
     "releases": [
+        {
+            "version": "2.0.7",
+            "date": "2026-08-22",
+            "title": "Employee master data and user UX",
+            "changes": [
+                "Add calling name, middle initials, name, and joined date fields for users.",
+                "Seed plants, departments, designations, and employees from DSI Employee List Excel.",
+                "Import profile photos by EPF into storage, with object-fit display and lightbox.",
+                "Super Admin set password, auto-reset, and bulk password reset with CSV download.",
+                "Self password change no longer requires the current password.",
+                "Users page card/list view toggle; Users tree search by name, email, EPF, and org fields."
+            ]
+        },
         {
             "version": "2.0.6",
             "date": "2026-07-30",

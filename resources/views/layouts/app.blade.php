@@ -17,6 +17,7 @@
 <body class="min-h-screen bg-surface font-sans text-ink antialiased">
     <div class="min-h-screen lg:flex" x-data="{ sidebarOpen: false }">
         @include('partials.confirm-delete-modal')
+        @include('partials.image-lightbox')
         {{-- Mobile overlay --}}
         <div
             x-show="sidebarOpen"
@@ -164,10 +165,10 @@
                 <div class="mb-3 flex items-center gap-3">
                     <a href="{{ route('profile.edit') }}" class="flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1 transition hover:bg-slate-50">
                         @if(auth()->user()->profilePictureUrl())
-                            <img src="{{ auth()->user()->profilePictureUrl() }}" alt="" class="h-10 w-10 rounded-full object-cover ring-2 ring-brand-100">
+                            <x-profile-photo :url="auth()->user()->profilePictureUrl()" class="h-10 w-10" rounded="rounded-full" ring="ring-2 ring-brand-100" :alt="auth()->user()->displayName()" />
                         @else
                             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700">
-                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                {{ strtoupper(substr(auth()->user()->calling_name ?: auth()->user()->name, 0, 1)) }}
                             </div>
                         @endif
                         <div class="min-w-0">

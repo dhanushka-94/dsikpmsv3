@@ -20,7 +20,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserController extends Controller
 {
@@ -45,6 +47,9 @@ class UserController extends Controller
                 $search = $request->string('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('calling_name', 'like', "%{$search}%")
+                        ->orWhere('middle_initials', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%")
                         ->orWhere('epf_number', 'like', "%{$search}%");
                 });
@@ -312,6 +317,117 @@ class UserController extends Controller
             ]);
     }
 
+    public function setPassword(Request $request, User $user): RedirectResponse
+    {
+        if (! auth()->user()->isSuperAdmin()) {
+            abort(403, 'Only Super Admins can set passwords.');
+        }
+
+        $validated = $request->validate([
+            'password' => ['required', 'confirmed', Password::defaults()],
+            'must_change_password' => ['nullable', 'boolean'],
+            'send_email' => ['nullable', 'boolean'],
+        ]);
+
+        $plainPassword = $validated['password'];
+        $mustChange = $request->boolean('must_change_password');
+
+        $user->update([
+            'password' => Hash::make($plainPassword),
+            'must_change_password' => $mustChange,
+        ]);
+
+        $emailed = false;
+        if ($request->boolean('send_email')) {
+            Mail::to($user->email)->send(new TemporaryPasswordMail($user, $plainPassword, true));
+            $emailed = true;
+        }
+
+        $this->activityLogger->forModel(
+            action: 'password_set',
+            subject: $user,
+            description: 'Set password for '.$user->displayName().' ('.$user->email.')',
+            module: 'users',
+            properties: [
+                'email' => $user->email,
+                'must_change_password' => $mustChange,
+                'credentials_emailed' => $emailed,
+            ],
+        );
+
+        return redirect()
+            ->route('users.show', $user)
+            ->with('success', 'Password set successfully.')
+            ->with('temp_credentials', [
+                'email' => $user->email,
+                'password' => $plainPassword,
+                'emailed' => $emailed,
+            ]);
+    }
+
+    public function resetAllPasswords(Request $request): StreamedResponse|RedirectResponse
+    {
+        if (! auth()->user()->isSuperAdmin()) {
+            abort(403, 'Only Super Admins can reset all passwords.');
+        }
+
+        $request->validate([
+            'confirm' => ['accepted'],
+        ], [
+            'confirm.accepted' => 'Please confirm that you want to reset all user passwords.',
+        ]);
+
+        $users = User::query()
+            ->where('id', '!=', auth()->id())
+            ->orderBy('email')
+            ->get();
+
+        if ($users->isEmpty()) {
+            return back()->with('error', 'No other users found to reset.');
+        }
+
+        $rows = [
+            ['email', 'epf_number', 'name', 'temporary_password'],
+        ];
+
+        foreach ($users as $user) {
+            $temporaryPassword = $this->passwordService->generate();
+
+            $user->update([
+                'password' => Hash::make($temporaryPassword),
+                'must_change_password' => true,
+            ]);
+
+            $rows[] = [
+                $user->email,
+                $user->epf_number ?? '',
+                $user->displayName(),
+                $temporaryPassword,
+            ];
+        }
+
+        $this->activityLogger->log(
+            action: 'password_reset_all',
+            description: 'Reset auto-generated passwords for '.$users->count().' users',
+            module: 'users',
+            properties: [
+                'user_count' => $users->count(),
+            ],
+        );
+
+        $filename = 'user-passwords-'.now()->format('Ymd-His').'.csv';
+
+        return response()->streamDownload(function () use ($rows) {
+            $handle = fopen('php://output', 'w');
+            foreach ($rows as $row) {
+                fputcsv($handle, $row);
+            }
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
     private function formData(?User $exclude = null): array
     {
         return [
@@ -361,8 +477,11 @@ class UserController extends Controller
         }
 
         $validated = $request->validate([
-            'title' => ['required', Rule::in(array_keys(UserTitle::options()))],
-            'name' => ['required', 'string', 'max:255'],
+            'title' => ['nullable', Rule::in(array_keys(UserTitle::options()))],
+            'calling_name' => ['required', 'string', 'max:255'],
+            'middle_initials' => ['nullable', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'joined_date' => ['nullable', 'date'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$id],
             'epf_number' => ['nullable', 'string', 'max:50', 'unique:users,epf_number,'.$id],
             'company_id' => ['required', 'exists:companies,id'],
@@ -391,6 +510,24 @@ class UserController extends Controller
         if (empty($validated['epf_number'])) {
             $validated['epf_number'] = null;
         }
+
+        if (empty($validated['middle_initials'])) {
+            $validated['middle_initials'] = null;
+        }
+
+        if (empty($validated['joined_date'])) {
+            $validated['joined_date'] = null;
+        }
+
+        if (empty($validated['title'])) {
+            $validated['title'] = null;
+        }
+
+        $validated['name'] = User::composeFullName(
+            $validated['calling_name'] ?? null,
+            $validated['middle_initials'] ?? null,
+            $validated['last_name'] ?? null,
+        );
 
         return $validated;
     }

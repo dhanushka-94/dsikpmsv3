@@ -14,10 +14,10 @@
         <a href="{{ route('users.profile', $user) }}" class="flex gap-3">
             <div class="relative shrink-0">
                 @if($user->profilePictureUrl())
-                    <img src="{{ $user->profilePictureUrl() }}" alt="" class="h-12 w-12 rounded-2xl object-cover ring-2 ring-white shadow-sm sm:h-14 sm:w-14">
+                    <x-profile-photo :url="$user->profilePictureUrl()" class="h-12 w-12 sm:h-14 sm:w-14" rounded="rounded-2xl" ring="ring-2 ring-white shadow-sm" :alt="$user->displayName()" />
                 @else
                     <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-100 text-base font-extrabold text-brand-700 ring-2 ring-white shadow-sm sm:h-14 sm:w-14 sm:text-lg">
-                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                        {{ strtoupper(substr($user->calling_name ?: $user->name, 0, 1)) }}
                     </div>
                 @endif
                 <span class="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-white {{ $user->is_active ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
