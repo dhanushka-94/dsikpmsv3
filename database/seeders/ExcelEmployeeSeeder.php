@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\UserRole;
+use App\Enums\UserTitle;
 use App\Models\Company;
 use App\Models\Department;
 use App\Models\Designation;
@@ -78,23 +79,21 @@ class ExcelEmployeeSeeder extends Seeder
                 continue;
             }
 
-            $email = $row['epf'].'@dsifootwear.com';
+            $email = $row['email'] !== '' ? $row['email'] : $row['epf'].'@dsifootwear.com';
             if (User::query()->where('email', $email)->exists()) {
                 $skippedExisting++;
                 $this->command?->warn("Skipped EPF {$row['epf']}: email {$email} already exists.");
                 continue;
             }
 
+            $title = $this->resolveTitle($row['title']);
+
             $user = User::query()->create([
-                'title' => null,
+                'title' => $title,
                 'calling_name' => $row['calling_name'],
-                'middle_initials' => $row['middle_initials'] !== '' ? $row['middle_initials'] : null,
-                'last_name' => $row['last_name'],
-                'name' => User::composeFullName(
-                    $row['calling_name'],
-                    $row['middle_initials'] !== '' ? $row['middle_initials'] : null,
-                    $row['last_name'],
-                ),
+                'middle_initials' => null,
+                'last_name' => null,
+                'name' => $row['name'],
                 'email' => $email,
                 'epf_number' => $row['epf'],
                 'joined_date' => $row['joined_date'],
@@ -143,8 +142,9 @@ class ExcelEmployeeSeeder extends Seeder
      * @return list<array{
      *   epf: string,
      *   calling_name: string,
-     *   middle_initials: string,
-     *   last_name: string,
+     *   name: string,
+     *   title: string,
+     *   email: string,
      *   department_code: string,
      *   plant_code: string,
      *   designation: string,
@@ -166,12 +166,13 @@ class ExcelEmployeeSeeder extends Seeder
 
         $indexes = [
             'epf' => $this->findColumn($header, ['epf no', 'epf']),
+            'title' => $this->findColumn($header, ['title']),
             'calling_name' => $this->findColumn($header, ['calling name']),
             'middle_initials' => $this->findColumn($header, ['middle initials']),
-            'last_name' => $this->findColumn($header, ['last name', 'name']),
             'department_code' => $this->findColumn($header, ['department code']),
             'plant_code' => $this->findColumn($header, ['plant code']),
             'designation' => $this->findColumn($header, ['designation']),
+            'email' => $this->findColumn($header, ['email address', 'email']),
             'joined_date' => $this->findColumn($header, ['joined date']),
             'supervisor_epf' => $this->findColumn($header, [
                 'functional supervisor - employee number',
@@ -179,16 +180,10 @@ class ExcelEmployeeSeeder extends Seeder
             ]),
         ];
 
-        foreach (['epf', 'calling_name', 'last_name', 'department_code', 'plant_code', 'designation'] as $required) {
+        foreach (['epf', 'calling_name', 'middle_initials', 'department_code', 'plant_code', 'designation'] as $required) {
             if ($indexes[$required] === null) {
                 throw new RuntimeException("Excel missing required column for {$required}.");
             }
-        }
-
-        // Prefer true "Last Name" column over generic "Name" if both exist.
-        $lastNameExact = array_search('last name', $header, true);
-        if ($lastNameExact !== false) {
-            $indexes['last_name'] = (int) $lastNameExact;
         }
 
         $employees = [];
@@ -203,16 +198,17 @@ class ExcelEmployeeSeeder extends Seeder
             }
 
             $calling = $this->clean((string) ($row[$indexes['calling_name']] ?? ''));
-            $lastName = $this->clean((string) ($row[$indexes['last_name']] ?? ''));
-            if ($calling === '' || $lastName === '') {
+            $name = $this->clean((string) ($row[$indexes['middle_initials']] ?? ''));
+            if ($calling === '' || $name === '') {
                 continue;
             }
 
             $employees[] = [
                 'epf' => $epf,
+                'title' => $this->clean((string) ($row[$indexes['title']] ?? '')),
                 'calling_name' => $calling,
-                'middle_initials' => $this->clean((string) ($row[$indexes['middle_initials']] ?? '')),
-                'last_name' => $lastName,
+                'name' => $name,
+                'email' => strtolower($this->clean((string) ($row[$indexes['email']] ?? ''))),
                 'department_code' => $this->clean((string) ($row[$indexes['department_code']] ?? '')),
                 'plant_code' => $this->clean((string) ($row[$indexes['plant_code']] ?? '')),
                 'designation' => $this->clean((string) ($row[$indexes['designation']] ?? '')),
@@ -224,6 +220,16 @@ class ExcelEmployeeSeeder extends Seeder
         }
 
         return $employees;
+    }
+
+    private function resolveTitle(string $title): ?UserTitle
+    {
+        $title = trim($title);
+        if ($title === '') {
+            return null;
+        }
+
+        return UserTitle::tryFrom($title);
     }
 
     /**

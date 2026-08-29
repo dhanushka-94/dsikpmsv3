@@ -45,6 +45,7 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'title' => ['required', Rule::in(array_keys(UserTitle::options()))],
+            'calling_name' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'epf_number' => ['nullable', 'string', 'max:50', 'unique:users,epf_number,'.$user->id],
             'department_id' => ['required', 'exists:departments,id'],
@@ -84,6 +85,9 @@ class ProfileController extends Controller
         }
 
         unset($validated['remove_profile_picture']);
+
+        $validated['middle_initials'] = null;
+        $validated['last_name'] = null;
 
         $passwordChanged = array_key_exists('password', $validated);
         $before = $this->activityLogger->snapshot($user);

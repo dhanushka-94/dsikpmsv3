@@ -19,13 +19,8 @@
         </div>
 
         <div>
-            <label class="mb-1.5 block text-sm font-semibold">Middle initials</label>
-            <input type="text" name="middle_initials" value="{{ old('middle_initials', $user?->middle_initials) }}" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
-        </div>
-
-        <div>
             <label class="mb-1.5 block text-sm font-semibold">Name <span class="text-brand-600">*</span></label>
-            <input type="text" name="last_name" value="{{ old('last_name', $user?->last_name) }}" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
+            <input type="text" name="name" value="{{ old('name', $user?->name) }}" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
         </div>
 
         <div>

@@ -48,8 +48,6 @@ class UserController extends Controller
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
                         ->orWhere('calling_name', 'like', "%{$search}%")
-                        ->orWhere('middle_initials', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%")
                         ->orWhere('epf_number', 'like', "%{$search}%");
                 });
@@ -479,8 +477,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'title' => ['nullable', Rule::in(array_keys(UserTitle::options()))],
             'calling_name' => ['required', 'string', 'max:255'],
-            'middle_initials' => ['nullable', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'joined_date' => ['nullable', 'date'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$id],
             'epf_number' => ['nullable', 'string', 'max:50', 'unique:users,epf_number,'.$id],
@@ -511,9 +508,8 @@ class UserController extends Controller
             $validated['epf_number'] = null;
         }
 
-        if (empty($validated['middle_initials'])) {
-            $validated['middle_initials'] = null;
-        }
+        $validated['middle_initials'] = null;
+        $validated['last_name'] = null;
 
         if (empty($validated['joined_date'])) {
             $validated['joined_date'] = null;
@@ -522,12 +518,6 @@ class UserController extends Controller
         if (empty($validated['title'])) {
             $validated['title'] = null;
         }
-
-        $validated['name'] = User::composeFullName(
-            $validated['calling_name'] ?? null,
-            $validated['middle_initials'] ?? null,
-            $validated['last_name'] ?? null,
-        );
 
         return $validated;
     }

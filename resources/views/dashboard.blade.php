@@ -290,8 +290,12 @@
                 @endif
                 <dl class="grid flex-1 gap-3 sm:grid-cols-2">
                     <div>
-                        <dt class="text-xs font-bold uppercase tracking-wider text-muted">Full name</dt>
-                        <dd class="mt-1 font-semibold">{{ $user->displayName() }}</dd>
+                        <dt class="text-xs font-bold uppercase tracking-wider text-muted">Calling name</dt>
+                        <dd class="mt-1 font-semibold">{{ $user->calling_name ?: '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-bold uppercase tracking-wider text-muted">Name</dt>
+                        <dd class="mt-1 font-semibold">{{ $user->name ?: '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-bold uppercase tracking-wider text-muted">Role</dt>

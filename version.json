@@ -1,7 +1,18 @@
 {
-    "version": "2.0.7",
-    "released_at": "2026-08-22",
+    "version": "2.0.8",
+    "released_at": "2026-08-30",
     "releases": [
+        {
+            "version": "2.0.8",
+            "date": "2026-08-30",
+            "title": "Calling name and employee name fields",
+            "changes": [
+                "Simplify user names to Calling name and Name only, mapped from Excel Calling Name and Middle Initials.",
+                "Add users:sync-excel and users:sync-emails-from-excel commands for employee master updates.",
+                "Re-sync all employees from DSI Employee List Excel with calling names restored.",
+                "Show Calling name and Name on Users list view, profile, dashboard, and user forms."
+            ]
+        },
         {
             "version": "2.0.7",
             "date": "2026-08-22",

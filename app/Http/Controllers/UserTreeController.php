@@ -175,10 +175,8 @@ class UserTreeController extends Controller
         $matches = $users->filter(function (User $user) use ($needle) {
             $haystack = mb_strtolower(implode(' ', array_filter([
                 $user->displayName(),
-                $user->name,
                 $user->calling_name,
-                $user->middle_initials,
-                $user->last_name,
+                $user->name,
                 $user->email,
                 $user->epf_number,
                 $user->designation?->name,

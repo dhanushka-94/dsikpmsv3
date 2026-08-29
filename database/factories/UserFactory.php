@@ -19,14 +19,14 @@ class UserFactory extends Factory
     public function definition(): array
     {
         $callingName = fake()->firstName();
-        $lastName = fake()->lastName();
+        $name = fake()->lastName();
 
         return [
             'title' => fake()->randomElement(UserTitle::cases())->value,
             'calling_name' => $callingName,
-            'middle_initials' => fake()->optional()->lexify('? ?'),
-            'last_name' => $lastName,
-            'name' => User::composeFullName($callingName, null, $lastName),
+            'middle_initials' => null,
+            'last_name' => null,
+            'name' => $name,
             'email' => fake()->unique()->safeEmail(),
             'epf_number' => fake()->optional()->unique()->numerify('EPF####'),
             'joined_date' => fake()->optional()->date(),

@@ -133,24 +133,12 @@ class User extends Authenticatable
 
     public function displayName(): string
     {
-        $parts = array_filter([
+        $label = trim(implode(' ', array_filter([
             $this->calling_name,
-            $this->middle_initials,
-            $this->last_name,
-        ], fn ($part) => filled($part));
-
-        $fullName = $parts !== [] ? implode(' ', $parts) : $this->name;
-
-        return trim(($this->title?->value ? $this->title->value.' ' : '').$fullName);
-    }
-
-    public static function composeFullName(?string $callingName, ?string $middleInitials, ?string $lastName): string
-    {
-        return trim(implode(' ', array_filter([
-            $callingName,
-            $middleInitials,
-            $lastName,
+            $this->name,
         ], fn ($part) => filled($part))));
+
+        return trim(($this->title?->value ? $this->title->value.' ' : '').$label);
     }
 
     public function profilePictureUrl(): ?string

@@ -38,12 +38,8 @@
                             <dd class="mt-1 font-semibold">{{ $user->calling_name ?: '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-bold uppercase tracking-wider text-muted">Middle initials</dt>
-                            <dd class="mt-1 font-semibold">{{ $user->middle_initials ?: '—' }}</dd>
-                        </div>
-                        <div>
                             <dt class="text-xs font-bold uppercase tracking-wider text-muted">Name</dt>
-                            <dd class="mt-1 font-semibold">{{ $user->last_name ?: '—' }}</dd>
+                            <dd class="mt-1 font-semibold">{{ $user->name ?: '—' }}</dd>
                         </div>
                         <div>
                             <dt class="text-xs font-bold uppercase tracking-wider text-muted">Joined date</dt>

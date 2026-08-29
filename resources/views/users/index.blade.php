@@ -146,6 +146,8 @@
                         <thead class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-muted">
                             <tr>
                                 <th class="px-4 py-3">User</th>
+                                <th class="px-4 py-3">Calling name</th>
+                                <th class="px-4 py-3">Name</th>
                                 <th class="px-4 py-3">EPF</th>
                                 <th class="px-4 py-3">Company / Plant</th>
                                 <th class="px-4 py-3">Department</th>
@@ -168,11 +170,13 @@
                                                 </div>
                                             @endif
                                             <div class="min-w-0">
-                                                <a href="{{ route('users.profile', $user) }}" class="block truncate font-bold hover:text-brand-700">{{ $user->displayName() }}</a>
+                                                <a href="{{ route('users.profile', $user) }}" class="block truncate font-bold hover:text-brand-700">{{ $user->calling_name ?: $user->name }}</a>
                                                 <p class="truncate text-xs text-muted">{{ $user->email }}</p>
                                             </div>
                                         </div>
                                     </td>
+                                    <td class="whitespace-nowrap px-4 py-3 font-semibold text-slate-700">{{ $user->calling_name ?: '—' }}</td>
+                                    <td class="px-4 py-3 text-slate-600">{{ $user->name ?: '—' }}</td>
                                     <td class="whitespace-nowrap px-4 py-3 text-slate-600">{{ $user->epf_number ?: '—' }}</td>
                                     <td class="px-4 py-3">
                                         <p class="font-medium text-slate-700">{{ $user->company?->name ?? '—' }}</p>

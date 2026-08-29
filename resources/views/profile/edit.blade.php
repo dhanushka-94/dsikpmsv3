@@ -23,6 +23,11 @@
                 </div>
 
                 <div>
+                    <label class="mb-1.5 block text-sm font-semibold">Calling name <span class="text-brand-600">*</span></label>
+                    <input type="text" name="calling_name" value="{{ old('calling_name', $user->calling_name) }}" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
+                </div>
+
+                <div>
                     <label class="mb-1.5 block text-sm font-semibold">Name <span class="text-brand-600">*</span></label>
                     <input type="text" name="name" value="{{ old('name', $user->name) }}" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
                 </div>
