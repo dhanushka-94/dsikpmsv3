@@ -1,5 +1,10 @@
 <?php
 
+/*
+| DSI KPI Monitoring System
+| Developed by olexto Digital Solutions - info@olexto.com - https://olexto.com
+*/
+
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 
@@ -10,27 +15,46 @@ if (! function_exists('app_version')) {
     }
 }
 
+if (! function_exists('dsi_timezone')) {
+    function dsi_timezone(): string
+    {
+        return (string) config('app.timezone', 'Asia/Colombo');
+    }
+}
+
+if (! function_exists('dsi_date')) {
+    /**
+     * Display date only in Sri Lankan format (e.g. 30 Aug 2026).
+     */
+    function dsi_date(mixed $value, string $fallback = '—'): string
+    {
+        $date = dsi_parse_datetime($value);
+
+        return $date?->format('d M Y') ?? $fallback;
+    }
+}
+
 if (! function_exists('dsi_datetime')) {
     /**
-     * Display date + time with AM/PM.
+     * Display date + time with AM/PM in Sri Lankan timezone.
      */
     function dsi_datetime(mixed $value, string $fallback = '—'): string
     {
         $date = dsi_parse_datetime($value);
 
-        return $date?->format('Y-m-d h:i A') ?? $fallback;
+        return $date?->format('d M Y h:i A') ?? $fallback;
     }
 }
 
 if (! function_exists('dsi_datetimesec')) {
     /**
-     * Display date + time (with seconds) with AM/PM.
+     * Display date + time (with seconds) with AM/PM in Sri Lankan timezone.
      */
     function dsi_datetimesec(mixed $value, string $fallback = '—'): string
     {
         $date = dsi_parse_datetime($value);
 
-        return $date?->format('Y-m-d h:i:s A') ?? $fallback;
+        return $date?->format('d M Y h:i:s A') ?? $fallback;
     }
 }
 
@@ -66,7 +90,7 @@ if (! function_exists('dsi_parse_datetime')) {
     function dsi_parse_datetime(mixed $value): ?CarbonInterface
     {
         if ($value instanceof CarbonInterface) {
-            return $value;
+            return $value->copy()->timezone(dsi_timezone());
         }
 
         if ($value === null || $value === '') {
@@ -74,7 +98,7 @@ if (! function_exists('dsi_parse_datetime')) {
         }
 
         try {
-            return Carbon::parse($value);
+            return Carbon::parse($value)->timezone(dsi_timezone());
         } catch (Throwable) {
             return null;
         }

@@ -135,7 +135,7 @@ class Project extends Model
 
     public static function yearOptions(?int $center = null): array
     {
-        $center ??= (int) now('Asia/Colombo')->year;
+        $center ??= (int) now()->year;
         $years = [];
 
         for ($year = $center - 5; $year <= $center + 5; $year++) {

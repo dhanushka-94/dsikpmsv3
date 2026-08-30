@@ -55,7 +55,7 @@
                     @forelse($logs as $log)
                         <tr class="hover:bg-slate-50/70">
                             <td class="px-4 py-3 whitespace-nowrap">
-                                <p class="font-semibold">{{ $log->created_at->format('Y-m-d') }}</p>
+                                <p class="font-semibold">{{ dsi_date($log->created_at) }}</p>
                                 <p class="text-xs text-muted">{{ dsi_time($log->created_at, true) }}</p>
                             </td>
                             <td class="px-4 py-3">

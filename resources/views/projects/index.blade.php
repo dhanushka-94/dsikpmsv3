@@ -98,11 +98,11 @@
                         </div>
                         <div class="rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3.5">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-muted">Start</p>
-                            <p class="mt-1.5 text-base font-extrabold text-ink">{{ optional($project->start_date)->format('Y-m-d') ?? '—' }}</p>
+                            <p class="mt-1.5 text-base font-extrabold text-ink">{{ dsi_date($project->start_date) }}</p>
                         </div>
                         <div class="rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3.5">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-muted">End</p>
-                            <p class="mt-1.5 text-base font-extrabold text-ink">{{ optional($project->end_date)->format('Y-m-d') ?? '—' }}</p>
+                            <p class="mt-1.5 text-base font-extrabold text-ink">{{ dsi_date($project->end_date) }}</p>
                         </div>
                         <div class="rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3.5">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-muted">Team</p>

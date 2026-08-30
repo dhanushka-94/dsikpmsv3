@@ -20,7 +20,7 @@
             <label class="mb-1.5 block text-sm font-semibold">Project year <span class="text-brand-600">*</span></label>
             <select name="year" required class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
                 @foreach($years as $value => $label)
-                    <option value="{{ $value }}" @selected((string) old('year', $project?->year ?? now('Asia/Colombo')->year) === (string) $value)>{{ $label }}</option>
+                    <option value="{{ $value }}" @selected((string) old('year', $project?->year ?? now()->year) === (string) $value)>{{ $label }}</option>
                 @endforeach
             </select>
         </div>

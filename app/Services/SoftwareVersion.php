@@ -71,7 +71,7 @@ class SoftwareVersion
 
         $data = $this->data();
         $next = $this->increment($data['version'], $level);
-        $today = Carbon::now('Asia/Colombo')->toDateString();
+        $today = Carbon::now()->toDateString();
 
         $changes = collect($changes)
             ->map(fn ($line) => trim((string) $line))

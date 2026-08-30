@@ -258,7 +258,7 @@ class ProjectController extends Controller
     private function validateProject(Request $request, ?Project $project = null): array
     {
         $id = $project?->id;
-        $currentYear = (int) now('Asia/Colombo')->year;
+        $currentYear = (int) now()->year;
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],

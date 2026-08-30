@@ -52,11 +52,11 @@
                     </div>
                     <div>
                         <dt class="text-xs font-bold uppercase tracking-wider text-muted">Start date</dt>
-                        <dd class="mt-1 font-semibold">{{ optional($project->start_date)->format('Y-m-d') ?? '—' }}</dd>
+                        <dd class="mt-1 font-semibold">{{ dsi_date($project->start_date) }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-bold uppercase tracking-wider text-muted">End date</dt>
-                        <dd class="mt-1 font-semibold">{{ optional($project->end_date)->format('Y-m-d') ?? '—' }}</dd>
+                        <dd class="mt-1 font-semibold">{{ dsi_date($project->end_date) }}</dd>
                     </div>
                 </dl>
                 @if($project->description)

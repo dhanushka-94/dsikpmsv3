@@ -1,5 +1,10 @@
 <?php
 
+/*
+| DSI KPI Monitoring System
+| Developed by olexto Digital Solutions - info@olexto.com - https://olexto.com
+*/
+
 use App\Http\Controllers\ChangelogController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\ForcePasswordChangeController;

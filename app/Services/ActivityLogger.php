@@ -126,7 +126,9 @@ class ActivityLogger
         }
 
         if ($value instanceof \DateTimeInterface) {
-            return $value->format('Y-m-d h:i:s A');
+            return \Illuminate\Support\Carbon::parse($value)
+                ->timezone(config('app.timezone', 'Asia/Colombo'))
+                ->format('d M Y h:i:s A');
         }
 
         if (is_array($value)) {

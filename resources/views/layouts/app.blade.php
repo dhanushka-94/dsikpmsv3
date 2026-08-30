@@ -189,6 +189,7 @@
                     @else
                         <p class="text-[10px] font-bold text-slate-400">v{{ app_version() }}</p>
                     @endif
+                    <p class="mt-1 text-[10px] text-slate-400">{{ now()->format('D, d M Y · h:i A') }} · Sri Lanka</p>
                     <p class="mt-1 text-[10px] text-slate-400">Developed by olexto Digital Solutions</p>
                 </div>
             </div>

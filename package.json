@@ -1,6 +1,10 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
+    "name": "dsi-kpi-monitoring",
+    "description": "DSI KPI Monitoring System — developed by olexto Digital Solutions",
     "private": true,
+    "author": "olexto Digital Solutions <info@olexto.com> (https://olexto.com)",
+    "homepage": "https://olexto.com",
     "type": "module",
     "scripts": {
         "build": "vite build",

@@ -1,10 +1,23 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "olexto/dsi-kpi-monitoring",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
-    "license": "MIT",
+    "description": "DSI KPI Monitoring System — developed by olexto Digital Solutions (info@olexto.com · https://olexto.com)",
+    "keywords": ["dsi", "kpi", "monitoring", "laravel", "olexto"],
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "olexto Digital Solutions",
+            "email": "info@olexto.com",
+            "homepage": "https://olexto.com",
+            "role": "Developer"
+        }
+    ],
+    "homepage": "https://olexto.com",
+    "support": {
+        "email": "info@olexto.com",
+        "docs": "https://olexto.com"
+    },
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",

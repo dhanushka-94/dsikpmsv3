@@ -22,8 +22,8 @@
         projectId: @js((string) old('project_id', $selectedProject?->id ?? '')),
         projectUsers: @js($projectUsersMap),
         selected: @js(collect($selectedAssignees ?? [])->map(fn ($id) => (string) $id)->values()),
-        startsAt: @js(old('starts_at', optional($task?->starts_at)->format('Y-m-d\TH:i') ?? now('Asia/Colombo')->format('Y-m-d\TH:i'))),
-        endsAt: @js(old('ends_at', optional($task?->ends_at)->format('Y-m-d\TH:i') ?? now('Asia/Colombo')->addDay()->format('Y-m-d\TH:i'))),
+        startsAt: @js(old('starts_at', optional($task?->starts_at)->format('Y-m-d\TH:i') ?? now()->format('Y-m-d\TH:i'))),
+        endsAt: @js(old('ends_at', optional($task?->ends_at)->format('Y-m-d\TH:i') ?? now()->addDay()->format('Y-m-d\TH:i'))),
         get assignees() {
             return this.projectUsers[this.projectId] || [];
         },

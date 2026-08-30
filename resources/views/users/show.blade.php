@@ -43,7 +43,7 @@
                         </div>
                         <div>
                             <dt class="text-xs font-bold uppercase tracking-wider text-muted">Joined date</dt>
-                            <dd class="mt-1 font-semibold">{{ $user->joined_date?->format('d M Y') ?: '—' }}</dd>
+                            <dd class="mt-1 font-semibold">{{ dsi_date($user->joined_date) }}</dd>
                         </div>
                         <div>
                             <dt class="text-xs font-bold uppercase tracking-wider text-muted">EPF Number</dt>

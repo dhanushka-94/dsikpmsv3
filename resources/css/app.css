@@ -1,3 +1,8 @@
+/*
+| DSI KPI Monitoring System
+| Developed by olexto Digital Solutions - info@olexto.com - https://olexto.com
+*/
+
 @import 'tailwindcss';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';

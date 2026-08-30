@@ -248,7 +248,7 @@
                             <div class="min-w-0">
                                 <x-long-text :text="$entry->kpi?->name ?? 'KPI'" :lines="2" class="font-semibold" />
                                 <p class="mt-0.5 break-words text-xs text-muted [overflow-wrap:anywhere]">
-                                    {{ $entry->recorded_on->format('Y-m-d') }}
+                                    {{ dsi_date($entry->recorded_on) }}
                                     · {{ $entry->creator?->displayName() ?? '—' }}
                                     @foreach(($entry->values ?? []) as $valueName => $value)
                                         · {{ $valueName }}: {{ $value }}

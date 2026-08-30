@@ -289,7 +289,7 @@
                                 @php $isNewest = $historyResults->onFirstPage() && $loop->first; @endphp
                                 <tr class="{{ $isNewest ? 'bg-brand-50/40' : '' }}">
                                     <td class="px-3 py-3 font-semibold whitespace-nowrap">
-                                        {{ $entry->recorded_on->format('Y-m-d') }}
+                                        {{ dsi_date($entry->recorded_on) }}
                                         @if($isNewest)
                                             <span class="ml-1 rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold text-brand-700">Newest</span>
                                         @endif
@@ -363,7 +363,7 @@
                     </div>
                     <div>
                         <dt class="text-xs font-bold uppercase tracking-wider text-muted">Period</dt>
-                        <dd class="mt-1 font-semibold">{{ $kpi->start_date->format('Y-m-d') }} → {{ $kpi->end_date->format('Y-m-d') }}</dd>
+                        <dd class="mt-1 font-semibold">{{ dsi_date($kpi->start_date) }} → {{ dsi_date($kpi->end_date) }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-bold uppercase tracking-wider text-muted">Created by</dt>

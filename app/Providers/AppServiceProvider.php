@@ -1,5 +1,10 @@
 <?php
 
+/*
+| DSI KPI Monitoring System
+| Developed by olexto Digital Solutions - info@olexto.com - https://olexto.com
+*/
+
 namespace App\Providers;
 
 use Carbon\Carbon;
@@ -20,9 +25,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Carbon::macro('dsiDateTime', fn () => $this->format('Y-m-d h:i A'));
-        Carbon::macro('dsiDateTimeSec', fn () => $this->format('Y-m-d h:i:s A'));
-        Carbon::macro('dsiTime', fn (bool $withSeconds = false) => $this->format($withSeconds ? 'h:i:s A' : 'h:i A'));
-        Carbon::macro('dsiDateTimeShort', fn () => $this->format('M j, g:i A'));
+        $timezone = (string) config('app.timezone', 'Asia/Colombo');
+
+        date_default_timezone_set($timezone);
+        Carbon::setLocale((string) config('app.locale', 'en'));
+
+        Carbon::macro('dsiDate', fn () => $this->timezone(config('app.timezone'))->format('d M Y'));
+        Carbon::macro('dsiDateTime', fn () => $this->timezone(config('app.timezone'))->format('d M Y h:i A'));
+        Carbon::macro('dsiDateTimeSec', fn () => $this->timezone(config('app.timezone'))->format('d M Y h:i:s A'));
+        Carbon::macro('dsiTime', fn (bool $withSeconds = false) => $this->timezone(config('app.timezone'))->format($withSeconds ? 'h:i:s A' : 'h:i A'));
+        Carbon::macro('dsiDateTimeShort', fn () => $this->timezone(config('app.timezone'))->format('M j, g:i A'));
     }
 }

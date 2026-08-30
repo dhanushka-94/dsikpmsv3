@@ -116,8 +116,8 @@
                         </div>
                         <div class="rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-4">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-muted">Period</p>
-                            <p class="mt-2 text-base font-extrabold text-ink">{{ $kpi->start_date->format('Y-m-d') }}</p>
-                            <p class="mt-1 text-sm font-semibold text-muted">to {{ $kpi->end_date->format('Y-m-d') }}</p>
+                            <p class="mt-2 text-base font-extrabold text-ink">{{ dsi_date($kpi->start_date) }}</p>
+                            <p class="mt-1 text-sm font-semibold text-muted">to {{ dsi_date($kpi->end_date) }}</p>
                         </div>
                         <div class="rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-4">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-muted">Coverage</p>
