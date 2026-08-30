@@ -1,7 +1,15 @@
 {
-    "version": "2.0.8",
+    "version": "2.0.9",
     "released_at": "2026-08-30",
     "releases": [
+        {
+            "version": "2.0.9",
+            "date": "2026-08-30",
+            "title": "GitHub update",
+            "changes": [
+                "Add olexto developer credits and Sri Lankan timezone across the app."
+            ]
+        },
         {
             "version": "2.0.8",
             "date": "2026-08-30",
