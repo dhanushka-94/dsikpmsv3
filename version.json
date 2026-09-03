@@ -1,7 +1,16 @@
 {
-    "version": "2.0.10",
-    "released_at": "2026-08-30",
+    "version": "2.0.11",
+    "released_at": "2026-09-04",
     "releases": [
+        {
+            "version": "2.0.11",
+            "date": "2026-09-04",
+            "title": "Project assign users picker",
+            "changes": [
+                "Replace the project Assign users search and native dropdown with a searchable picker matching the app's select style.",
+                "Show user initials, designation, and department in the picker and assigned list, with search by name, calling name, and org fields."
+            ]
+        },
         {
             "version": "2.0.10",
             "date": "2026-08-30",

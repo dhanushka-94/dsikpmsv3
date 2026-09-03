@@ -4,7 +4,9 @@
     $userOptions = $assignableUsers->map(fn ($u) => [
         'id' => $u->id,
         'name' => $u->displayName(),
+        'calling_name' => $u->calling_name,
         'meta' => trim(($u->designation?->name ?? '').($u->department ? ' · '.$u->department->name : '')),
+        'initial' => strtoupper(substr($u->calling_name ?: $u->name, 0, 1)),
     ])->values();
 @endphp
 
@@ -89,14 +91,24 @@
         users: @js($userOptions),
         assignees: @js($assigneeSeed),
         search: '',
+        open: false,
         get available() {
             const selected = this.assignees.map(a => String(a.user_id));
-            return this.users.filter(u => !selected.includes(String(u.id)) && (!this.search || u.name.toLowerCase().includes(this.search.toLowerCase()) || (u.meta || '').toLowerCase().includes(this.search.toLowerCase())));
+            const needle = this.search.trim().toLowerCase();
+            return this.users.filter((u) => {
+                if (selected.includes(String(u.id))) return false;
+                if (!needle) return true;
+                return [u.name, u.calling_name, u.meta].filter(Boolean).some((value) => String(value).toLowerCase().includes(needle));
+            });
+        },
+        userFor(userId) {
+            return this.users.find(u => String(u.id) === String(userId));
         },
         add(userId) {
             if (!userId) return;
             this.assignees.push({ user_id: String(userId), permission: 'viewer', is_enabled: true });
             this.search = '';
+            this.open = false;
         },
         remove(index) {
             this.assignees.splice(index, 1);
@@ -111,56 +123,110 @@
             });
         },
         labelFor(userId) {
-            const user = this.users.find(u => String(u.id) === String(userId));
-            return user ? user.name : 'Unknown user';
+            return this.userFor(userId)?.name || 'Unknown user';
         },
         metaFor(userId) {
-            const user = this.users.find(u => String(u.id) === String(userId));
-            return user ? (user.meta || '') : '';
+            return this.userFor(userId)?.meta || '';
+        },
+        initialFor(userId) {
+            return this.userFor(userId)?.initial || '?';
         }
     }"
+    @click.outside="open = false"
 >
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
             <h2 class="text-base font-bold">Assign users</h2>
-            <p class="mt-1 text-sm text-muted">Default permission is Viewer. Disable a user to revoke access without removing them.</p>
+            <p class="mt-1 text-sm text-muted">Search by name, calling name, designation, or department. Default permission is Viewer.</p>
         </div>
         <span class="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700" x-text="assignees.length + ' assigned'"></span>
     </div>
 
-    <div class="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
-        <input type="text" x-model="search" placeholder="Search users to assign..." class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
-        <select class="rounded-2xl border border-slate-200 px-4 py-3 text-sm" @change="add($event.target.value); $event.target.value = ''">
-            <option value="">Add user...</option>
-            <template x-for="user in available" :key="user.id">
-                <option :value="user.id" x-text="user.name + (user.meta ? ' — ' + user.meta : '')"></option>
-            </template>
-        </select>
+    <div class="relative mt-4">
+        <label class="mb-1.5 block text-sm font-semibold">Add team member</label>
+        <button
+            type="button"
+            @click="open = !open; $nextTick(() => { if (open) $refs.userSearch?.focus() })"
+            class="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
+        >
+            <span class="text-muted">Search and add a user...</span>
+            <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+
+        <div
+            x-show="open"
+            x-cloak
+            x-transition
+            class="absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl"
+        >
+            <div class="border-b border-slate-100 p-2">
+                <input
+                    x-ref="userSearch"
+                    type="text"
+                    x-model="search"
+                    placeholder="Search users..."
+                    class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500"
+                    @click.stop
+                    @keydown.escape.prevent="open = false"
+                >
+            </div>
+            <ul class="max-h-64 overflow-y-auto py-1">
+                <template x-for="user in available" :key="user.id">
+                    <li>
+                        <button
+                            type="button"
+                            class="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-brand-50"
+                            @click="add(user.id)"
+                        >
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-xs font-extrabold text-brand-700" x-text="user.initial"></span>
+                            <span class="min-w-0">
+                                <span class="block truncate text-sm font-semibold text-ink" x-text="user.name"></span>
+                                <span class="block truncate text-xs text-muted" x-text="user.meta || 'No designation'"></span>
+                            </span>
+                        </button>
+                    </li>
+                </template>
+                <li x-show="available.length === 0" class="px-4 py-6 text-center text-sm text-muted">
+                    <span x-show="search.trim()">No matching users</span>
+                    <span x-show="!search.trim()">All available users are already assigned</span>
+                </li>
+            </ul>
+        </div>
     </div>
 
     <div class="mt-4 space-y-3">
         <template x-for="(assignee, index) in assignees" :key="assignee.user_id + '-' + index">
             <div class="flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center"
-                 :class="assignee.is_enabled !== false ? 'border-slate-200 bg-slate-50/80' : 'border-slate-200 bg-slate-100 opacity-70'">
+                 :class="assignee.is_enabled !== false ? 'border-slate-200 bg-slate-50/80' : 'border-dashed border-slate-300 bg-slate-100/80'">
                 <input type="hidden" :name="'assignees[' + index + '][user_id]'" :value="assignee.user_id">
                 <input type="hidden" :name="'assignees[' + index + '][is_enabled]'" :value="assignee.is_enabled !== false ? 1 : 0">
-                <div class="min-w-0 flex-1">
-                    <p class="font-semibold" :class="assignee.is_enabled === false && 'line-through text-slate-500'" x-text="labelFor(assignee.user_id)"></p>
-                    <p class="text-xs text-muted" x-text="metaFor(assignee.user_id)"></p>
+                <div class="flex min-w-0 flex-1 items-center gap-3">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-50 text-sm font-extrabold text-brand-700" x-text="initialFor(assignee.user_id)"></div>
+                    <div class="min-w-0">
+                        <p class="truncate font-semibold" :class="assignee.is_enabled === false && 'line-through text-slate-500'" x-text="labelFor(assignee.user_id)"></p>
+                        <p class="truncate text-xs text-muted" x-text="metaFor(assignee.user_id) || '—'"></p>
+                    </div>
+                    <span
+                        class="hidden rounded-full px-2.5 py-1 text-[11px] font-bold sm:inline-flex"
+                        :class="assignee.is_enabled !== false ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-200 text-slate-500'"
+                        x-text="assignee.is_enabled !== false ? 'Active' : 'Disabled'"
+                    ></span>
                 </div>
-                <select :name="'assignees[' + index + '][permission]'" x-model="assignee.permission" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold">
-                    @foreach($permissions as $value => $label)
-                        <option value="{{ $value }}">{{ $label }}</option>
-                    @endforeach
-                </select>
-                <button type="button"
-                        class="rounded-xl px-3 py-2 text-xs font-bold"
-                        :class="assignee.is_enabled !== false ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'"
-                        @click="assignee.is_enabled = !(assignee.is_enabled !== false)"
-                        x-text="assignee.is_enabled !== false ? 'Disable' : 'Enable'"></button>
-                <button type="button" class="rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-700" @click="requestRemoveAssignee(index)">Remove</button>
+                <div class="flex flex-wrap items-center gap-2 sm:shrink-0">
+                    <select :name="'assignees[' + index + '][permission]'" x-model="assignee.permission" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100">
+                        @foreach($permissions as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    <button type="button"
+                            class="rounded-xl px-3 py-2 text-xs font-bold"
+                            :class="assignee.is_enabled !== false ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'"
+                            @click="assignee.is_enabled = !(assignee.is_enabled !== false)"
+                            x-text="assignee.is_enabled !== false ? 'Disable' : 'Enable'"></button>
+                    <button type="button" class="rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-700" @click="requestRemoveAssignee(index)">Remove</button>
+                </div>
             </div>
         </template>
-        <p x-show="assignees.length === 0" class="rounded-2xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-muted">No users assigned yet.</p>
+        <p x-show="assignees.length === 0" class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 px-4 py-8 text-center text-sm text-muted">No users assigned yet. Use search above to add the team.</p>
     </div>
 </div>
