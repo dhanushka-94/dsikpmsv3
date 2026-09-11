@@ -1,7 +1,16 @@
 {
-    "version": "2.0.11",
-    "released_at": "2026-09-04",
+    "version": "2.0.12",
+    "released_at": "2026-09-11",
     "releases": [
+        {
+            "version": "2.0.12",
+            "date": "2026-09-11",
+            "title": "Longer KPI formula value names",
+            "changes": [
+                "Allow KPI formula value names up to 255 characters (was 100).",
+                "Add matching maxlength and client-side validation on the KPI formula builder."
+            ]
+        },
         {
             "version": "2.0.11",
             "date": "2026-09-04",

@@ -608,7 +608,7 @@ class KpiController extends Controller
             'definition' => ['nullable', 'string', 'max:5000'],
             'formula' => ['required', 'string', 'max:1000'],
             'formula_fields' => ['required', 'array', 'min:1'],
-            'formula_fields.*.name' => ['required', 'string', 'max:100', 'distinct'],
+            'formula_fields.*.name' => ['required', 'string', 'max:255', 'distinct'],
             'benchmark_percent' => ['required', 'numeric', 'min:0', 'max:1000'],
             'benchmark_type' => ['required', Rule::in(array_keys(BenchmarkType::options()))],
             'start_date' => ['required', 'date'],

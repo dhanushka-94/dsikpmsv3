@@ -101,6 +101,7 @@
                     type="text"
                     x-model="newFieldName"
                     @keydown.enter.prevent="addField()"
+                    maxlength="255"
                     placeholder="Value name (e.g. Actual Sales)"
                     class="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
                 >
@@ -120,6 +121,7 @@
                                 <input
                                     type="text"
                                     x-model="editingName"
+                                    maxlength="255"
                                     @keydown.enter.prevent="saveFieldName(index)"
                                     @keydown.escape.prevent="cancelEditField()"
                                     class="mt-1 w-full rounded-xl border border-brand-300 bg-white px-3 py-2 text-sm font-semibold outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
@@ -373,6 +375,10 @@
                     this.error = 'Value name cannot include { or }.';
                     return;
                 }
+                if (name.length > 255) {
+                    this.error = 'Value name must be 255 characters or less.';
+                    return;
+                }
                 if (this.fields.some((field) => field.name.toLowerCase() === name.toLowerCase())) {
                     this.error = 'That value name already exists.';
                     return;
@@ -411,6 +417,10 @@
                 }
                 if (/[{}]/.test(newName)) {
                     this.error = 'Value name cannot include { or }.';
+                    return;
+                }
+                if (newName.length > 255) {
+                    this.error = 'Value name must be 255 characters or less.';
                     return;
                 }
                 if (this.fields.some((field, i) => i !== index && field.name.toLowerCase() === newName.toLowerCase())) {
