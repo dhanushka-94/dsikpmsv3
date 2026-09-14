@@ -520,7 +520,7 @@ class KpiController extends Controller
                 ];
             }
         } elseif ($kpi) {
-            foreach ($kpi->users as $user) {
+            foreach ($kpi->users()->orderByPivot('created_at', 'desc')->orderByPivot('id', 'desc')->get() as $user) {
                 $selectedAssignments[] = [
                     'user_id' => (string) $user->id,
                     'weightage' => (float) $user->pivot->weightage,

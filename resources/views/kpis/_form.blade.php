@@ -272,7 +272,7 @@
                 if (!id) return;
                 const available = this.availableFor(id);
                 if (available <= 0) return;
-                this.assignments.push({ user_id: String(id), weightage: Math.min(available, 100) });
+                this.assignments.unshift({ user_id: String(id), weightage: Math.min(available, 100) });
                 this.search = '';
             },
             remove(index) {
