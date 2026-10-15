@@ -135,7 +135,7 @@
                     <div class="flex flex-wrap items-start justify-between gap-3">
                         <div>
                             <h3 class="text-base font-bold">Quick formula data feed</h3>
-                            <p class="mt-1 text-sm text-muted">Enter date + values and save to history without opening the KPI page.</p>
+                            <p class="mt-1 text-sm text-muted">Enter date and values, attach an Excel file, image, or PDF if you have one, and save to history.</p>
                         </div>
                         <div class="rounded-2xl bg-brand-50 px-4 py-3 text-right">
                             <p class="text-[11px] font-bold uppercase tracking-wider text-brand-700/70">Live result</p>
@@ -143,7 +143,7 @@
                         </div>
                     </div>
 
-                    <form method="POST" action="{{ route('kpis.calculate', $kpi) }}" class="mt-5 space-y-5">
+                    <form method="POST" action="{{ route('kpis.calculate', $kpi) }}" enctype="multipart/form-data" class="mt-5 space-y-5">
                         @csrf
                         <input type="hidden" name="redirect_to" value="index">
                         <input type="hidden" name="kpi_id" value="{{ $kpi->id }}">
@@ -180,6 +180,8 @@
                                 </label>
                             @endforeach
                         </div>
+
+                        @include('kpis._feed_attachments', ['showAttachmentErrors' => (string) old('kpi_id') === (string) $kpi->id])
 
                         <p class="text-xs font-semibold text-red-600" x-show="error" x-text="error"></p>
 

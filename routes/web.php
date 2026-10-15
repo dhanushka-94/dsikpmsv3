@@ -89,6 +89,9 @@ Route::middleware(['auth', EnsureUserIsActive::class])->group(function () {
 
         Route::get('kpis/{kpi}', [KpiController::class, 'show'])->name('kpis.show');
         Route::post('kpis/{kpi}/calculate', [KpiController::class, 'calculate'])->name('kpis.calculate');
+        Route::get('kpis/{kpi}/results/{result}/attachments/{attachment}', [KpiController::class, 'downloadAttachment'])
+            ->whereNumber('attachment')
+            ->name('kpis.results.attachments');
 
         Route::middleware('role:super_admin')->group(function () {
             Route::get('changelog', ChangelogController::class)->name('changelog.index');

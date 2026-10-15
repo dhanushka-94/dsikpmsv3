@@ -79,6 +79,13 @@ class Kpi extends Model
             ->withTimestamps();
     }
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Kpi $kpi) {
+            $kpi->results()->reorder()->get()->each->deleteStoredAttachments();
+        });
+    }
+
     public function results(): HasMany
     {
         // Newest saves first so freshly fed data is visible at the top of history.

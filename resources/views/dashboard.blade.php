@@ -253,6 +253,9 @@
                                     @foreach(($entry->values ?? []) as $valueName => $value)
                                         · {{ $valueName }}: {{ $value }}
                                     @endforeach
+                                    @if(count($entry->attachments ?? []))
+                                        · {{ count($entry->attachments) }} {{ count($entry->attachments) === 1 ? 'file' : 'files' }}
+                                    @endif
                                 </p>
                             </div>
                             <span class="shrink-0 text-sm font-extrabold text-brand-700">{{ $entry->result }}</span>

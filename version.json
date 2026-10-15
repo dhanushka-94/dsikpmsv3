@@ -1,7 +1,16 @@
 {
-    "version": "2.0.13",
-    "released_at": "2026-09-14",
+    "version": "2.0.14",
+    "released_at": "2026-10-15",
     "releases": [
+        {
+            "version": "2.0.14",
+            "date": "2026-10-15",
+            "title": "KPI feed attachment",
+            "changes": [
+                "Allow one Excel, image, or PDF file (maximum 5 MB) when feeding KPI formula data.",
+                "Show the attached file in KPI result history and on the latest feeds list."
+            ]
+        },
         {
             "version": "2.0.13",
             "date": "2026-09-14",

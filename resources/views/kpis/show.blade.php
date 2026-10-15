@@ -111,7 +111,7 @@
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
                         <h2 class="text-base font-bold">Feed data</h2>
-                        <p class="mt-1 text-sm text-muted">Select a date, enter values, and save — all results are kept in history.</p>
+                        <p class="mt-1 text-sm text-muted">Select a date, enter values, and optionally attach an Excel file, image, or PDF. All results are kept in history.</p>
                     </div>
                     <div class="rounded-2xl bg-brand-50 px-4 py-2 text-right">
                         <p class="text-[11px] font-bold uppercase tracking-wider text-brand-700/70">Result</p>
@@ -124,7 +124,7 @@
                     <p class="mt-1 break-words font-mono text-sm font-semibold [overflow-wrap:anywhere]" title="{{ $kpi->formula }}">{{ $kpi->formula }}</p>
                 </div>
 
-                <form method="POST" action="{{ route('kpis.calculate', $kpi) }}" class="mt-5 space-y-4">
+                <form method="POST" action="{{ route('kpis.calculate', $kpi) }}" enctype="multipart/form-data" class="mt-5 space-y-4">
                     @csrf
 
                     <div>
@@ -162,6 +162,8 @@
                             </div>
                         @endforeach
                     </div>
+
+                    @include('kpis._feed_attachments')
 
                     <p class="text-xs font-semibold text-red-600" x-show="error" x-text="error"></p>
 
@@ -278,6 +280,7 @@
                                 <th class="px-3 py-3">Date</th>
                                 <th class="px-3 py-3">Values</th>
                                 <th class="px-3 py-3">Result</th>
+                                <th class="px-3 py-3">Attachments</th>
                                 <th class="px-3 py-3">Saved by</th>
                                 @if($canManage ?? false)
                                     <th class="px-3 py-3 text-right">Actions</th>
@@ -306,6 +309,18 @@
                                     <td class="px-3 py-3">
                                         <span class="text-base font-extrabold text-brand-700">{{ $entry->result }}</span>
                                     </td>
+                                    <td class="px-3 py-3">
+                                        @forelse(($entry->attachments ?? []) as $index => $file)
+                                            <a
+                                                href="{{ route('kpis.results.attachments', [$kpi, $entry, $index]) }}"
+                                                target="_blank"
+                                                class="block max-w-[14rem] truncate text-xs font-semibold text-brand-700 hover:underline"
+                                                title="{{ $file['original_name'] ?? 'Attachment' }}"
+                                            >{{ $file['original_name'] ?? 'Attachment' }}</a>
+                                        @empty
+                                            <span class="text-xs text-muted">—</span>
+                                        @endforelse
+                                    </td>
                                     <td class="px-3 py-3 text-muted whitespace-nowrap">
                                         {{ $entry->creator?->displayName() ?? '—' }}
                                         <div class="text-[11px]">{{ dsi_datetime($entry->created_at) }}</div>
@@ -322,7 +337,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ ($canManage ?? false) ? 5 : 4 }}" class="px-3 py-10 text-center text-muted">
+                                    <td colspan="{{ ($canManage ?? false) ? 6 : 5 }}" class="px-3 py-10 text-center text-muted">
                                         @if($hasDateFilter ?? false)
                                             No results in this date range.
                                         @else

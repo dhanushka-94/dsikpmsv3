@@ -17,10 +17,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\File;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class KpiController extends Controller
 {
@@ -706,6 +709,14 @@ class KpiController extends Controller
                 'before_or_equal:'.$kpi->end_date->format('Y-m-d'),
             ],
             'values' => ['required', 'array'],
+            'attachments' => ['nullable', 'array', 'max:1'],
+            'attachments.*' => [
+                File::types(['pdf', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif', 'webp'])->max(5 * 1024),
+            ],
+        ], [
+            'attachments.max' => 'You can attach only 1 file.',
+            'attachments.*.mimes' => 'The file must be an Excel spreadsheet (.xls, .xlsx), an image, or a PDF.',
+            'attachments.*.max' => 'The file must be 5 MB or smaller.',
         ]);
 
         $posted = $validated['values'];
@@ -747,12 +758,24 @@ class KpiController extends Controller
             'created_by' => $request->user()->id,
         ]);
 
+        try {
+            $attachments = $this->storeFeedAttachments($request, $kpi, $entry);
+            if ($attachments !== []) {
+                $entry->update(['attachments' => $attachments]);
+            }
+        } catch (\Throwable $e) {
+            $entry->delete();
+
+            throw $e;
+        }
+
         $kpi->update([
             'formula_values' => $values,
             'formula_result' => $result,
         ]);
 
         $source = $request->input('redirect_to') === 'index' ? 'quick_feed' : 'kpi_detail';
+        $attachmentCount = count($entry->attachments ?? []);
 
         $this->activityLogger->forModel(
             action: 'result_saved',
@@ -769,12 +792,54 @@ class KpiController extends Controller
                 'values' => $values,
                 'result' => $result,
                 'source' => $source,
+                'attachments' => collect($entry->attachments ?? [])->map(fn (array $file) => [
+                    'name' => $file['original_name'] ?? '',
+                    'size' => $file['size'] ?? null,
+                ])->values()->all(),
             ],
         );
 
+        $message = 'KPI result added to history for '.$validated['recorded_on'].' (result: '.$result.').';
+        if ($attachmentCount > 0) {
+            $message .= ' '.$attachmentCount.' '.($attachmentCount === 1 ? 'file' : 'files').' attached.';
+        }
+
         return redirect()
             ->to($source === 'quick_feed' ? route('kpis.index') : route('kpis.show', $kpi))
-            ->with('success', 'KPI result added to history for '.$validated['recorded_on'].' (result: '.$result.').');
+            ->with('success', $message);
+    }
+
+    public function downloadAttachment(Kpi $kpi, KpiResult $result, int $attachment): BinaryFileResponse
+    {
+        $this->authorizeView($kpi);
+
+        if ($result->kpi_id !== $kpi->id) {
+            abort(404);
+        }
+
+        $files = array_values($result->attachments ?? []);
+        $file = $files[$attachment] ?? null;
+        $path = is_array($file) ? (string) ($file['path'] ?? '') : '';
+        $prefix = 'kpi-results/'.$kpi->id.'/'.$result->id.'/';
+
+        if ($path === '' || ! str_starts_with($path, $prefix) || str_contains($path, '..') || ! Storage::disk('local')->exists($path)) {
+            abort(404);
+        }
+
+        $name = str_replace(['"', "\r", "\n"], '', (string) ($file['original_name'] ?? 'attachment'));
+        $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+        $absolute = Storage::disk('local')->path($path);
+        $headers = [
+            'Content-Type' => (string) ($file['mime'] ?? 'application/octet-stream'),
+        ];
+
+        if (in_array($extension, ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
+            $headers['Content-Disposition'] = 'inline; filename="'.$name.'"';
+
+            return response()->file($absolute, $headers);
+        }
+
+        return response()->download($absolute, $name !== '' ? $name : 'attachment', $headers);
     }
 
     public function destroyResult(Kpi $kpi, KpiResult $result): RedirectResponse
@@ -868,6 +933,33 @@ class KpiController extends Controller
         }
 
         return $assignments;
+    }
+
+    /**
+     * @return list<array{path: string, original_name: string, mime: string, size: int|null}>
+     */
+    private function storeFeedAttachments(Request $request, Kpi $kpi, KpiResult $entry): array
+    {
+        $stored = [];
+
+        foreach ($request->file('attachments', []) as $file) {
+            if (! $file) {
+                continue;
+            }
+
+            $path = $file->store('kpi-results/'.$kpi->id.'/'.$entry->id, 'local');
+            $name = basename(str_replace('\\', '/', $file->getClientOriginalName()));
+            $name = mb_substr($name !== '' ? $name : 'attachment', 0, 180);
+
+            $stored[] = [
+                'path' => $path,
+                'original_name' => $name,
+                'mime' => (string) ($file->getMimeType() ?: $file->getClientMimeType() ?: 'application/octet-stream'),
+                'size' => $file->getSize(),
+            ];
+        }
+
+        return $stored;
     }
 
     private function authorizeView(Kpi $kpi): void
